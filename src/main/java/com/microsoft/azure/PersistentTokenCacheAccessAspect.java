@@ -41,8 +41,10 @@ public class PersistentTokenCacheAccessAspect implements ITokenCacheAccessAspect
      * */
     public void afterCacheAccess(ITokenCacheAccessContext iTokenCacheAccessContext) {
 
-        String newData = iTokenCacheAccessContext.tokenCache().serialize();
-        storage.writeCache(newData.getBytes());
+        if (iTokenCacheAccessContext.hasCacheChanged()) {
+            String newData = iTokenCacheAccessContext.tokenCache().serialize();
+            storage.writeCache(newData.getBytes());
+        }
     }
 
     public void deleteCache() {
