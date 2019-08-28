@@ -14,7 +14,7 @@ import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Files;
 import java.util.Random;
 
-public class CrossPlatLock {
+class CrossPlatLock {
 
     private int LockfileRetryWait = 100;
     private int LockfileRetryCount = 60000 / LockfileRetryWait;
@@ -29,7 +29,7 @@ public class CrossPlatLock {
 
     private boolean DEBUG_FLAG = false;
 
-    protected CrossPlatLock(String lockfileName) {
+    public CrossPlatLock(String lockfileName) {
         lockFile = new File(lockfileName);
     }
 
