@@ -29,7 +29,7 @@ public class CrossPlatLock {
 
     private boolean DEBUG_FLAG = false;
 
-    public CrossPlatLock(String lockfileName) {
+    protected CrossPlatLock(String lockfileName) {
         lockFile = new File(lockfileName);
     }
 

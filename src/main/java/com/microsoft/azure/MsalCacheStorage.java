@@ -13,7 +13,7 @@ import java.io.IOException;
 /*
  * Deals with the actual cache file: read/write/create/clear file
  * */
-public class MsalCacheStorage {
+class MsalCacheStorage {
 
     private String CACHE_LOCATION;
     private String LOCKFILE_LOCATION;
@@ -72,7 +72,6 @@ public class MsalCacheStorage {
 
     /*
      * Read file and return contents as byte[]
-     * TODO: how to deal with issue with reading
      * */
     public byte[] readCache() {
 
@@ -91,10 +90,10 @@ public class MsalCacheStorage {
             contents = cacheProtector.unprotect(SERVICE_NAME, ACCOUNT_NAME);
         } catch (IOException ex) {
             System.out.println("Issue in reading");
-            ex.printStackTrace();
+        } finally {
+            lock.unlock();
         }
 
-        lock.unlock();
         return contents.getBytes();
     }
 
@@ -115,9 +114,9 @@ public class MsalCacheStorage {
             cacheProtector.protect(SERVICE_NAME, ACCOUNT_NAME, new String(data));
         } catch (IOException e) {
             System.out.println("issue in writing");
+        } finally {
+            lock.unlock();
         }
-
-        lock.unlock();
     }
 
     public static class Builder {

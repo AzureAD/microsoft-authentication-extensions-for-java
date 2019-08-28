@@ -25,6 +25,8 @@ public class WindowsDPAPIBackend implements ICacheProtectorBackend {
      * */
     @Override
     public String unprotect(String service, String account) throws IOException {
+        makeSureFileExists();
+
         byte[] encrypted_bytes = new byte[(int) cache_file.length()];
 
         FileInputStream stream = new FileInputStream(cache_file);
@@ -41,10 +43,19 @@ public class WindowsDPAPIBackend implements ICacheProtectorBackend {
      * */
     @Override
     public void protect(String service, String account, String data) throws IOException {
+        makeSureFileExists();
+
         byte[] encrypted_bytes = Crypt32Util.cryptProtectData(data.getBytes("UTF-8"));
 
         FileOutputStream stream = new FileOutputStream(cache_file);
         stream.write(encrypted_bytes);
         stream.close();
+    }
+
+    private void makeSureFileExists() throws IOException {
+        if (!cache_file.exists()) {
+            cache_file.createNewFile();
+            protect("", "", " ");
+        }
     }
 }
