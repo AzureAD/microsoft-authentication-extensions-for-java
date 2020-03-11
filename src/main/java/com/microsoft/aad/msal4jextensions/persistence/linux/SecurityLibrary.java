@@ -15,7 +15,7 @@ public interface SecurityLibrary extends Library {
 
     int SECRET_SCHEMA_NONE = 0;
 
-    SecurityLibrary library = Native.load("Security", SecurityLibrary.class);
+    SecurityLibrary library = Native.load("libsecret-1", SecurityLibrary.class);
 
     Pointer secret_schema_new(String name,
                               int flags,
@@ -28,21 +28,21 @@ public interface SecurityLibrary extends Library {
                                    String label,
                                    String password,
                                    Pointer cancellable,
-                                   Pointer error,
+                                   Pointer[] error,
                                    String attribute1Key, String attribute1Value,
                                    String attribute2Key, String attribute2Value,
                                    Pointer end);
 
     String secret_password_lookup_sync(Pointer scheme,
                                        Pointer cancellable,
-                                       Pointer error,
+                                       Pointer[] error,
                                        String attribute1Key, String attribute1Value,
                                        String attribute2Key, String attribute2Value,
                                        Pointer end);
 
     int secret_password_clear_sync(Pointer scheme,
                                    Pointer cancellable,
-                                   Pointer error,
+                                   Pointer[] error,
                                    String attribute1Key, String attribute1Value,
                                    String attribute2Key, String attribute2Value,
                                    Pointer end);

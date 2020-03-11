@@ -63,7 +63,8 @@ public class KeyRingIO implements CacheIO {
 
     private byte[] read(String attributeValue1, String attributeValue2) {
         byte[] data = null;
-        Pointer error = Pointer.NULL;
+
+        Pointer[] error = new Pointer[1];
 
         String secret = SecurityLibrary.library.secret_password_lookup_sync(
                 getLibSecretSchema(),
@@ -73,8 +74,8 @@ public class KeyRingIO implements CacheIO {
                 attributeKey2, attributeValue2,
                 null);
 
-        if (error != Pointer.NULL) {
-            GError err = new GError(error);
+        if (error[0] != Pointer.NULL) {
+            GError err = new GError(error[0]);
             throw new KeyRingAccessException("An error while reading secret from keyring, " +
                     "domain:" + err.domain + " code:" + err.code + " message:" + err.message);
         } else if (secret != null && !secret.isEmpty()) {
@@ -90,7 +91,7 @@ public class KeyRingIO implements CacheIO {
     }
 
     private void write(byte[] data, String attributeValue1, String attributeValue2) {
-        Pointer error = Pointer.NULL;
+        Pointer[] error = new Pointer[1];
 
         SecurityLibrary.library.secret_password_store_sync(
                 getLibSecretSchema(),
@@ -103,8 +104,8 @@ public class KeyRingIO implements CacheIO {
                 attributeKey2, attributeValue2,
                 null);
 
-        if (error != Pointer.NULL) {
-            GError err = new GError(error);
+        if (error[0] != Pointer.NULL) {
+            GError err = new GError(error[0]);
 
             throw new KeyRingAccessException("An error while saving secret to keyring, " +
                     "domain:" + err.domain + " code:" + err.code + " message:" + err.message);
@@ -118,7 +119,7 @@ public class KeyRingIO implements CacheIO {
     }
 
     private void delete(String attributeValue1, String attributeValue2) {
-        Pointer error = Pointer.NULL;
+        Pointer[] error = new Pointer[1];
 
         SecurityLibrary.library.secret_password_clear_sync(
                 getLibSecretSchema(),
@@ -128,8 +129,8 @@ public class KeyRingIO implements CacheIO {
                 attributeKey2, attributeValue2,
                 null);
 
-        if (error != Pointer.NULL) {
-            GError err = new GError(error);
+        if (error[0] != Pointer.NULL) {
+            GError err = new GError(error[0] );
 
             throw new KeyRingAccessException("An error while deleting secret from keyring, " +
                     "domain:" + err.domain + " code:" + err.code + " message:" + err.message);
@@ -144,7 +145,7 @@ public class KeyRingIO implements CacheIO {
 
     private Pointer getLibSecretSchema() {
         if (libSecretSchema == Pointer.NULL) {
-            Pointer libSecretSchema = SecurityLibrary.library.secret_schema_new(
+            libSecretSchema = SecurityLibrary.library.secret_schema_new(
                     keyringSchemaName,
                     SecurityLibrary.library.SECRET_SCHEMA_NONE,
                     attributeKey1,

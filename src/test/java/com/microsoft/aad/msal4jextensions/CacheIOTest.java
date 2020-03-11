@@ -49,7 +49,8 @@ public class CacheIOTest {
         if(!Platform.isLinux()){
             return;
         }
-        String keyringCollection = "TestCollection";
+        // default collection
+        String keyringCollection = null;
         String keyringSchemaName = "TestSchemaName";
         String keyringSecretLabel = "TestSecretLabel";
         String attributeKey1 = "TestAttributeKey1";
