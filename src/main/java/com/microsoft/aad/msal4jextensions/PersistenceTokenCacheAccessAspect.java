@@ -59,7 +59,9 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
         } else if (Platform.isWindows()) {
             cacheAccessor = new CacheFileAccessor(cacheFilePath);
         } else if (Platform.isLinux()) {
-            try {
+            if (parameters.isOnLinuxUseUnprotectedFileAsCacheStorage()) {
+                cacheAccessor = new CacheFileAccessor(cacheFilePath);
+            } else {
                 cacheAccessor = new KeyRingAccessor(cacheFilePath,
                         parameters.getKeyringCollection(),
                         parameters.getKeyringSchemaName(),
@@ -70,8 +72,6 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
                         parameters.getKeyringAttribute2Value());
 
                 ((KeyRingAccessor) cacheAccessor).verify();
-            } catch (KeyRingAccessException ex) {
-                cacheAccessor = new CacheFileAccessor(cacheFilePath);
             }
         }
     }

@@ -22,6 +22,8 @@ public class PersistenceSettings {
     private String keyringAttribute2Key;
     private String keyringAttribute2Value;
 
+    private boolean linuxUseUnprotectedFileAsCacheStorage;
+
     private int lockRetryDelayMilliseconds;
     private int lockRetryNumber;
 
@@ -36,6 +38,7 @@ public class PersistenceSettings {
                                 String keyringAttribute1Value,
                                 String keyringAttribute2Key,
                                 String keyringAttribute2Value,
+                                boolean linuxUseUnprotectedFileAsCacheStorage,
                                 int lockRetryDelayMilliseconds,
                                 int lockRetryNumber) {
 
@@ -50,6 +53,7 @@ public class PersistenceSettings {
         this.keyringAttribute1Value = keyringAttribute1Value;
         this.keyringAttribute2Key = keyringAttribute2Key;
         this.keyringAttribute2Value = keyringAttribute2Value;
+        this.linuxUseUnprotectedFileAsCacheStorage = linuxUseUnprotectedFileAsCacheStorage;
         this.lockRetryDelayMilliseconds = lockRetryDelayMilliseconds;
         this.lockRetryNumber = lockRetryNumber;
     }
@@ -132,6 +136,13 @@ public class PersistenceSettings {
     }
 
     /**
+     * @return is UNPROTECTED FILE wil be used as storage on Linux
+     */
+    public boolean isOnLinuxUseUnprotectedFileAsCacheStorage() {
+        return linuxUseUnprotectedFileAsCacheStorage;
+    }
+
+    /**
      * @return Lock retry delay in milliseconds.
      */
     public int getLockRetryDelayMilliseconds() {
@@ -169,6 +180,8 @@ public class PersistenceSettings {
         private String keyringAttributeValue1;
         private String keyringAttributeKey2;
         private String keyringAttributeValue2;
+
+        private boolean linuxUseUnprotectedFileAsCacheStorage;
 
         private int lockRetryDelayMilliseconds = 100;
         private int lockRetryNumber = 60;
@@ -240,6 +253,23 @@ public class PersistenceSettings {
         }
 
         /**
+         * Augments this builder with linux persistence settings to
+         * use unprotected file as Cache storage.
+         * KEY RING as linux storage SHOULD BE USED normally.
+         * But if Key Ring is not available, Cache file can be used,
+         * BUT it is RESPONSIBILITY OF USER TO PROTECT CACHE FILE,
+         * That should be clearly articulated and explained to end user.
+         *
+         * @param useUnprotectedFileAsCacheStorage boolean value
+         * @return The augmented builder.
+         */
+        public Builder setLinuxUnprotectedFileAsCacheStorage(boolean useUnprotectedFileAsCacheStorage) {
+            linuxUseUnprotectedFileAsCacheStorage = useUnprotectedFileAsCacheStorage;
+
+            return this;
+        }
+
+        /**
          * Augments this builder with lock retry settings.
          *
          * @param delayMilliseconds Delay between retries in ms, must be 1 or more.
@@ -281,6 +311,7 @@ public class PersistenceSettings {
                     keyringAttributeValue1,
                     keyringAttributeKey2,
                     keyringAttributeValue2,
+                    linuxUseUnprotectedFileAsCacheStorage,
                     lockRetryDelayMilliseconds,
                     lockRetryNumber);
 
