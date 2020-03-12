@@ -5,49 +5,73 @@ package com.microsoft.aad.msal4jextensions;
 
 import com.microsoft.aad.msal4j.ITokenCacheAccessAspect;
 import com.microsoft.aad.msal4j.ITokenCacheAccessContext;
-import com.microsoft.aad.msal4jextensions.persistence.CacheFileIO;
-import com.microsoft.aad.msal4jextensions.persistence.CacheIO;
+import com.microsoft.aad.msal4jextensions.persistence.CacheFileAccessor;
+import com.microsoft.aad.msal4jextensions.persistence.CacheAccessor;
 import com.microsoft.aad.msal4jextensions.persistence.linux.KeyRingAccessException;
-import com.microsoft.aad.msal4jextensions.persistence.linux.KeyRingIO;
-import com.microsoft.aad.msal4jextensions.persistence.mac.KeyChainIO;
+import com.microsoft.aad.msal4jextensions.persistence.linux.KeyRingAccessor;
+import com.microsoft.aad.msal4jextensions.persistence.mac.KeyChainAccessor;
 import com.nimbusds.jose.util.StandardCharset;
 import com.sun.jna.Platform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
+/**
+ * Implementation of ITokenCacheAccessAspect which store MSAL token cache
+ * in platform specific secret storage:
+ * Win - file encrypted with DPAPI
+ * Mac - key chain
+ * Linux - key ring
+ */
 public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspect {
+    private final static Logger LOG = LoggerFactory.getLogger(PersistenceTokenCacheAccessAspect.class);
 
-    private CacheFileLock lock;
+    private CrossProcessCacheFileLock lock;
     private Long lastSeenCacheFileModifiedTimestamp;
-    private CacheIO cacheIO;
+    private CacheAccessor cacheAccessor;
 
-    private PersistenceParameters parameters;
+    private PersistenceSettings parameters;
 
-    public PersistenceTokenCacheAccessAspect(PersistenceParameters persistenceParameters) {
-        this.parameters = persistenceParameters;
+    private String getCacheLockFilePath(PersistenceSettings persistenceSettings) {
+        return Paths.get(persistenceSettings.getCacheDirectoryPath()) + File.separator + ".lock";
+    }
 
-        lock = new CacheFileLock(parameters.getCacheLockFilePath());
+    private String getCacheFilePath(PersistenceSettings persistenceSettings) {
+        return Paths.get(persistenceSettings.getCacheDirectoryPath()) + File.separator + persistenceSettings.getCacheFileName();
+    }
+
+    public PersistenceTokenCacheAccessAspect(PersistenceSettings persistenceSettings) {
+        this.parameters = persistenceSettings;
+
+        String cacheFilePath = getCacheFilePath(parameters);
+
+        lock = new CrossProcessCacheFileLock(getCacheLockFilePath(parameters),
+                persistenceSettings.getLockRetryDelayMilliseconds(),
+                persistenceSettings.getLockRetryNumber());
 
         if (Platform.isMac()) {
-            cacheIO = new KeyChainIO(
-                    parameters.getCacheFilePath(), parameters.getKeychainService(), parameters.getKeychainAccount());
+            cacheAccessor = new KeyChainAccessor(
+                    cacheFilePath, parameters.getKeychainService(), parameters.getKeychainAccount());
+
         } else if (Platform.isWindows()) {
-            cacheIO = new CacheFileIO(parameters.getCacheFilePath());
+            cacheAccessor = new CacheFileAccessor(cacheFilePath);
         } else if (Platform.isLinux()) {
             try {
-                cacheIO = new KeyRingIO(parameters.getCacheFilePath(),
+                cacheAccessor = new KeyRingAccessor(cacheFilePath,
                         parameters.getKeyringCollection(),
                         parameters.getKeyringSchemaName(),
                         parameters.getKeyringSecretLabel(),
-                        parameters.getKeyringAttributeKey1(),
-                        parameters.getKeyringAttributeValue1(),
-                        parameters.getKeyringAttributeKey2(),
-                        parameters.getKeyringAttributeValue2());
+                        parameters.getKeyringAttribute1Key(),
+                        parameters.getKeyringAttribute1Value(),
+                        parameters.getKeyringAttribute2Key(),
+                        parameters.getKeyringAttribute2Value());
 
-                ((KeyRingIO) cacheIO).verify();
+                ((KeyRingAccessor) cacheAccessor).verify();
             } catch (KeyRingAccessException ex) {
-                cacheIO = new CacheFileIO(persistenceParameters.getCacheFilePath());
+                cacheAccessor = new CacheFileAccessor(cacheFilePath);
             }
         }
     }
@@ -65,7 +89,11 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
     }
 
     public Long getCurrentCacheFileModifiedTimestamp() {
-        return new File(parameters.getCacheFilePath()).lastModified();
+        return new File(getCacheFilePath(parameters)).lastModified();
+    }
+
+    private boolean isCacheFileModifiedTimestampSupported() {
+        return Platform.isWindows();
     }
 
     @Override
@@ -75,14 +103,15 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
                 lock.writeLock();
             } else {
                 Long currentCacheFileModifiedTimestamp = getCurrentCacheFileModifiedTimestamp();
-                if (currentCacheFileModifiedTimestamp != null &&
+                if (isCacheFileModifiedTimestampSupported() &&
+                        currentCacheFileModifiedTimestamp != null &&
                         currentCacheFileModifiedTimestamp == lastSeenCacheFileModifiedTimestamp) {
                     return;
                 } else {
                     lock.readLock();
                 }
             }
-            byte[] data = cacheIO.read();
+            byte[] data = cacheAccessor.read();
             iTokenCacheAccessContext.tokenCache().deserialize(new String(data, StandardCharset.UTF_8));
 
             updateLastSeenCacheFileModifiedTimestamp();
@@ -91,6 +120,7 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
                 lock.unlock();
             }
         } catch (IOException ex) {
+            LOG.error(ex.getMessage());
         }
     }
 
@@ -98,11 +128,12 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
     public void afterCacheAccess(ITokenCacheAccessContext iTokenCacheAccessContext) {
         if (isWriteAccess(iTokenCacheAccessContext)) {
             try {
-                cacheIO.write(iTokenCacheAccessContext.tokenCache().serialize().getBytes());
+                cacheAccessor.write(iTokenCacheAccessContext.tokenCache().serialize().getBytes());
 
                 updateLastSeenCacheFileModifiedTimestamp();
                 lock.unlock();
             } catch (IOException ex) {
+                LOG.error(ex.getMessage());
             }
         }
     }

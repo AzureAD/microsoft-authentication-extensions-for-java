@@ -11,15 +11,17 @@ class CacheFileWriterRunnable implements Runnable {
     String id;
     String lockFilePath;
     File file;
+    CrossProcessCacheFileLock lock;
 
     CacheFileWriterRunnable(String id, String lockFilePath, String filePath) {
         this.id = id;
         this.lockFilePath = lockFilePath;
         this.file = new File(filePath);
+
+        lock = new CrossProcessCacheFileLock(lockFilePath, 100, 10);
     }
 
     public void run() {
-        CacheFileLock lock = new CacheFileLock(lockFilePath);
         try {
             lock.writeLock();
             file.createNewFile();

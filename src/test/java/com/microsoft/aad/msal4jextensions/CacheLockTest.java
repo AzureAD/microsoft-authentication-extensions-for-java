@@ -37,7 +37,7 @@ public class CacheLockTest {
     }
 
     @Test
-    public void tenThreadsWritingToFile() throws IOException, InterruptedException {
+    public void tenThreadsWritingToFile_notSharedLock() throws IOException, InterruptedException {
         int NUM_OF_THREADS = 10;
 
         File tester = new File(testFilePath);
@@ -48,6 +48,30 @@ public class CacheLockTest {
             CacheFileWriterRunnable cacheFileWriterRunnable =
                     new CacheFileWriterRunnable("Thread # " + i, lockFilePath, testFilePath);
 
+            writersThreads.add(new Thread(cacheFileWriterRunnable));
+        }
+
+        for (Thread t : writersThreads) {
+            t.start();
+            t.join();
+        }
+
+        validateResult();
+    }
+
+
+    @Test
+    public void tenThreadsWritingToFile_sharedLock() throws IOException, InterruptedException {
+        int NUM_OF_THREADS = 10;
+
+        File tester = new File(testFilePath);
+        tester.delete();
+
+        List<Thread> writersThreads = new ArrayList<>();
+        CacheFileWriterRunnable cacheFileWriterRunnable =
+                new CacheFileWriterRunnable("Thread # ", lockFilePath, testFilePath);
+
+        for (int i = 0; i < NUM_OF_THREADS; i++) {
             writersThreads.add(new Thread(cacheFileWriterRunnable));
         }
 

@@ -9,14 +9,19 @@ import com.sun.jna.Structure;
 import java.util.Arrays;
 import java.util.List;
 
-public class GError extends Structure {
-    public int domain;
+/**
+ * Error returned by libsecret library if saving or retrieving fails
+ * https://developer.gnome.org/glib/stable/glib-Error-Reporting.html
+ */
+class GError extends Structure {
 
-    public int code;
+    int domain;
 
-    public String message;
+    int code;
 
-    public GError(Pointer p) {
+    String message;
+
+    GError(Pointer p) {
         super(p);
         read();
     }

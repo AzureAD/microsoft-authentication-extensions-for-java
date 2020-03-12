@@ -3,8 +3,8 @@
 
 package com.microsoft.aad.msal4jextensions.persistence.linux;
 
-import com.microsoft.aad.msal4jextensions.persistence.CacheFileIO;
-import com.microsoft.aad.msal4jextensions.persistence.CacheIO;
+import com.microsoft.aad.msal4jextensions.persistence.CacheFileAccessor;
+import com.microsoft.aad.msal4jextensions.persistence.CacheAccessor;
 import com.nimbusds.jose.util.StandardCharset;
 import com.sun.jna.Pointer;
 
@@ -12,7 +12,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public class KeyRingIO implements CacheIO {
+/**
+ * Implementation of CacheAccessor based on KeyRing for Linux
+ */
+public class KeyRingAccessor implements CacheAccessor {
 
     private String cacheFilePath;
 
@@ -28,12 +31,12 @@ public class KeyRingIO implements CacheIO {
 
     private Pointer libSecretSchema;
 
-    public KeyRingIO(String cacheFilePath,
-                     String keyringCollection,
-                     String keyringSchemaName,
-                     String keyringSecretLabel,
-                     String attributeKey1, String attributeValue1,
-                     String attributeKey2, String attributeValue2) {
+    public KeyRingAccessor(String cacheFilePath,
+                           String keyringCollection,
+                           String keyringSchemaName,
+                           String keyringSecretLabel,
+                           String attributeKey1, String attributeValue1,
+                           String attributeKey2, String attributeValue2) {
 
         this.cacheFilePath = cacheFilePath;
         this.keyringCollection = keyringCollection;
@@ -110,11 +113,11 @@ public class KeyRingIO implements CacheIO {
             throw new KeyRingAccessException("An error while saving secret to keyring, " +
                     "domain:" + err.domain + " code:" + err.code + " message:" + err.message);
         }
-        new CacheFileIO(cacheFilePath).modifyCacheFile();
+        //new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
     }
 
     @Override
-    public void write(byte[] data) {
+    public void write(byte[] data) throws IOException {
         write(data, attributeValue1, attributeValue2);
     }
 
@@ -130,16 +133,16 @@ public class KeyRingIO implements CacheIO {
                 null);
 
         if (error[0] != Pointer.NULL) {
-            GError err = new GError(error[0] );
+            GError err = new GError(error[0]);
 
             throw new KeyRingAccessException("An error while deleting secret from keyring, " +
                     "domain:" + err.domain + " code:" + err.code + " message:" + err.message);
         }
-        new CacheFileIO(cacheFilePath).modifyCacheFile();
+        //new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
     }
 
     @Override
-    public void delete() {
+    public void delete() throws IOException {
         delete(attributeValue1, attributeValue2);
     }
 
@@ -147,11 +150,11 @@ public class KeyRingIO implements CacheIO {
         if (libSecretSchema == Pointer.NULL) {
             libSecretSchema = SecurityLibrary.library.secret_schema_new(
                     keyringSchemaName,
-                    SecurityLibrary.library.SECRET_SCHEMA_NONE,
+                    SecretSchemaFlags.SECRET_SCHEMA_NONE,
                     attributeKey1,
-                    SecurityLibrary.library.SECRET_SCHEMA_ATTRIBUTE_STRING,
+                    SecretSchemaAttributeType.SECRET_SCHEMA_ATTRIBUTE_STRING,
                     attributeKey2,
-                    SecurityLibrary.library.SECRET_SCHEMA_ATTRIBUTE_STRING,
+                    SecretSchemaAttributeType.SECRET_SCHEMA_ATTRIBUTE_STRING,
                     null);
 
             if (libSecretSchema == Pointer.NULL) {

@@ -3,10 +3,10 @@
 
 package com.microsoft.aad.msal4jextensions;
 
-import com.microsoft.aad.msal4jextensions.persistence.CacheFileIO;
-import com.microsoft.aad.msal4jextensions.persistence.CacheIO;
-import com.microsoft.aad.msal4jextensions.persistence.linux.KeyRingIO;
-import com.microsoft.aad.msal4jextensions.persistence.mac.KeyChainIO;
+import com.microsoft.aad.msal4jextensions.persistence.CacheFileAccessor;
+import com.microsoft.aad.msal4jextensions.persistence.CacheAccessor;
+import com.microsoft.aad.msal4jextensions.persistence.linux.KeyRingAccessor;
+import com.microsoft.aad.msal4jextensions.persistence.mac.KeyChainAccessor;
 import com.sun.jna.Platform;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-public class CacheIOTest {
+public class CacheAccessorTest {
 
     String cacheFilePath;
 
@@ -31,17 +31,17 @@ public class CacheIOTest {
         String keyChainAccount = "MSAL_Test_Account";
         String keyChainService = "MSAL_Test_Service";
 
-        CacheIO cacheIO = new KeyChainIO(cacheFilePath, keyChainService, keyChainAccount);
+        CacheAccessor cacheAccessor = new KeyChainAccessor(cacheFilePath, keyChainService, keyChainAccount);
 
-        readWriteTest(cacheIO);
+        readWriteTest(cacheAccessor);
     }
 
     @Test
     public void cacheFileIOTest() throws IOException {
 
-        CacheIO cacheIO  = new CacheFileIO(cacheFilePath);
+        CacheAccessor cacheAccessor = new CacheFileAccessor(cacheFilePath);
 
-        readWriteTest(cacheIO);
+        readWriteTest(cacheAccessor);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class CacheIOTest {
         String attributeKey2 = "TestAttributeKey2";
         String attributeValue2 = "TestAttributeValue2";
 
-        CacheIO cacheIO = new KeyRingIO(cacheFilePath,
+        CacheAccessor cacheAccessor = new KeyRingAccessor(cacheFilePath,
                 keyringCollection,
                 keyringSchemaName,
                 keyringSecretLabel,
@@ -67,25 +67,25 @@ public class CacheIOTest {
                 attributeKey2,
                 attributeValue2);
 
-        readWriteTest(cacheIO);
+        readWriteTest(cacheAccessor);
     }
 
-    private void readWriteAssert(CacheIO cacheIO, String data) throws IOException {
-        cacheIO.write(data.getBytes());
-        String receivedString = new String(cacheIO.read());
+    private void readWriteAssert(CacheAccessor cacheAccessor, String data) throws IOException {
+        cacheAccessor.write(data.getBytes());
+        String receivedString = new String(cacheAccessor.read());
 
         Assert.assertEquals(receivedString, data);
     }
 
 
-    private void readWriteTest(CacheIO cacheIO) throws IOException {
+    private void readWriteTest(CacheAccessor cacheAccessor) throws IOException {
         try {
-            cacheIO.delete();
+            cacheAccessor.delete();
 
-            readWriteAssert(cacheIO, "test data 1");
-            readWriteAssert(cacheIO, "test data 2");
+            readWriteAssert(cacheAccessor, "test data 1");
+            readWriteAssert(cacheAccessor, "test data 2");
         } finally {
-            cacheIO.delete();
+            cacheAccessor.delete();
         }
     }
 }

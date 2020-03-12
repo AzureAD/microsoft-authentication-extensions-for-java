@@ -3,7 +3,11 @@
 
 package com.microsoft.aad.msal4jextensions.persistence.linux;
 
+/**
+ * Runtime Exception representing error/failure to access KeyRing on Linux
+ */
 public class KeyRingAccessException extends RuntimeException {
+
     KeyRingAccessException(String message) {
         super(message);
     }

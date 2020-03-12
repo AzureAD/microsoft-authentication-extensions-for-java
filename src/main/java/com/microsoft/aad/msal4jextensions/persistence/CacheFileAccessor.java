@@ -10,11 +10,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 
-public class CacheFileIO implements CacheIO {
+/**
+ * Implementation of CacheAccessor based on File persistence
+ */
+public class CacheFileAccessor implements CacheAccessor {
     String cacheFilePath;
 
-    public CacheFileIO(String cacheFilePath) {
+    public CacheFileAccessor(String cacheFilePath) {
         this.cacheFilePath = cacheFilePath;
     }
 
@@ -48,13 +53,9 @@ public class CacheFileIO implements CacheIO {
         Files.deleteIfExists(new File(cacheFilePath).toPath());
     }
 
-    public void modifyCacheFile() {
-        try {
-            byte[] dummyData = new byte[1];
-            write(dummyData);
+    public void updateCacheFileLastModifiedTime() throws IOException {
+        FileTime fileTime = FileTime.fromMillis(System.currentTimeMillis());
 
-        } catch (IOException e) {
-            throw new FileIOException("Failed to modify cache file", e);
-        }
+        Files.setLastModifiedTime(Paths.get(cacheFilePath), fileTime);
     }
 }
