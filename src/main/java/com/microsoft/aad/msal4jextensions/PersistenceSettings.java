@@ -181,7 +181,7 @@ public class PersistenceSettings {
         private String keyringAttributeKey2;
         private String keyringAttributeValue2;
 
-        private boolean linuxUseUnprotectedFileAsCacheStorage;
+        private boolean linuxUseUnprotectedFileAsCacheStorage = false;
 
         private int lockRetryDelayMilliseconds = 100;
         private int lockRetryNumber = 60;
