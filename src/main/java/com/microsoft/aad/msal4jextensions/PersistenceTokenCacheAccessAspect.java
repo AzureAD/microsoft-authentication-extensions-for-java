@@ -7,7 +7,6 @@ import com.microsoft.aad.msal4j.ITokenCacheAccessAspect;
 import com.microsoft.aad.msal4j.ITokenCacheAccessContext;
 import com.microsoft.aad.msal4jextensions.persistence.CacheFileAccessor;
 import com.microsoft.aad.msal4jextensions.persistence.CacheAccessor;
-import com.microsoft.aad.msal4jextensions.persistence.linux.KeyRingAccessException;
 import com.microsoft.aad.msal4jextensions.persistence.linux.KeyRingAccessor;
 import com.microsoft.aad.msal4jextensions.persistence.mac.KeyChainAccessor;
 import com.nimbusds.jose.util.StandardCharset;
@@ -93,7 +92,7 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
     }
 
     private boolean isCacheFileModifiedTimestampSupported() {
-        return Platform.isWindows();
+        return true;
     }
 
     @Override
