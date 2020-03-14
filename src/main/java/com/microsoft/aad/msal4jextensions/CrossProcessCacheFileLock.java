@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 class CrossProcessCacheFileLock {
 
     private final static Logger LOG = LoggerFactory.getLogger(CrossProcessCacheFileLock.class);
+    public static final String READ_MODE = "r";
+    public static final String WRITE_MODE = "rw";
 
     private int retryDelayMilliseconds;
     private int retryNumber;
@@ -28,6 +30,8 @@ class CrossProcessCacheFileLock {
     private RandomAccessFile randomAccessFile;
 
     private String mode;
+
+    private FileLock lock;
 
     /**
      * Constructor
@@ -50,7 +54,7 @@ class CrossProcessCacheFileLock {
      * @throws CacheFileLockAcquisitionException
      */
     void readLock() throws CacheFileLockAcquisitionException {
-        lock("r");
+        lock(READ_MODE);
     }
 
     /**
@@ -59,7 +63,11 @@ class CrossProcessCacheFileLock {
      * @throws CacheFileLockAcquisitionException
      */
     void writeLock() throws CacheFileLockAcquisitionException {
-        lock("rw");
+        lock(WRITE_MODE);
+    }
+
+    private String getLockProcessThreadId(){
+        return "pid:" + ProcessHandle.current().pid() + " thread:" + Thread.currentThread().getId();
     }
 
     /**
@@ -73,9 +81,13 @@ class CrossProcessCacheFileLock {
             try {
                 lockFile.createNewFile();
 
+                LOG.debug(getLockProcessThreadId() + " acquiring " + mode + " file lock");
+
                 randomAccessFile = new RandomAccessFile(lockFile, mode);
                 FileChannel channel = randomAccessFile.getChannel();
-                FileLock lock = channel.lock();
+
+                boolean isShared = READ_MODE.equals(mode);
+                lock = channel.lock(0L, Long.MAX_VALUE, isShared);
 
                 this.mode = mode;
 
@@ -88,10 +100,10 @@ class CrossProcessCacheFileLock {
                             getBytes(StandardCharsets.UTF_8));
                     channel.write(buff);
                 }
-                LOG.debug("pid:" + ProcessHandle.current().pid() + " acquired file lock, isShared - " + lock.isShared());
+                LOG.debug(getLockProcessThreadId() + " acquired file lock, isShared - " + lock.isShared());
                 return;
             } catch (Exception ex) {
-                LOG.debug("pid:" + ProcessHandle.current().pid() + " failed to acquire " + mode + " lock," +
+                LOG.debug(getLockProcessThreadId() + " failed to acquire " + mode + " lock," +
                         " exception msg - " + ex.getMessage());
 
                 if (randomAccessFile != null) {
@@ -108,8 +120,10 @@ class CrossProcessCacheFileLock {
                 }
             }
         }
+        LOG.error(getLockProcessThreadId() + " failed to acquire " + mode + " lock");
+
         throw new CacheFileLockAcquisitionException(
-                ProcessHandle.current().pid() + " failed to acquire " + mode + " lock");
+                getLockProcessThreadId() + " failed to acquire " + mode + " lock");
     }
 
     /**
@@ -119,8 +133,11 @@ class CrossProcessCacheFileLock {
      */
     void unlock() throws IOException {
         if (randomAccessFile != null) {
-            LOG.debug("pid:" + ProcessHandle.current().pid() + " releasing " + mode + " lock");
+            LOG.debug(getLockProcessThreadId() + " releasing " + mode + " lock");
 
+            if(lock != null){
+                lock.release();
+            }
             randomAccessFile.close();
         }
     }

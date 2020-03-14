@@ -96,6 +96,7 @@ public class CacheLockTest {
         for (int i = 0; i < NUM_OF_PROCESSES; i++) {
             String[] command =
                     new String[]{"java", "-cp", folder, mainWriterClass, "Process # " + i, lockFilePath, testFilePath};
+
             Process process = new ProcessBuilder(command).inheritIO().start();
             processes.add(process);
         }

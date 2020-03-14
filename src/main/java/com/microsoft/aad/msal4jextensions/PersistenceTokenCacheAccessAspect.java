@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Files;
 
 /**
  * Implementation of ITokenCacheAccessAspect which store MSAL token cache
@@ -34,20 +34,28 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
 
     private PersistenceSettings parameters;
 
-    private String getCacheLockFilePath(PersistenceSettings persistenceSettings) {
-        return Paths.get(persistenceSettings.getCacheDirectoryPath()) + File.separator + ".lock";
+    private String getCacheLockFilePath() {
+        return parameters.getCacheDirectoryPath() + File.separator + ".lock";
     }
 
-    private String getCacheFilePath(PersistenceSettings persistenceSettings) {
-        return Paths.get(persistenceSettings.getCacheDirectoryPath()) + File.separator + persistenceSettings.getCacheFileName();
+    private String getCacheFilePath() {
+        return parameters.getCacheDirectoryPath() + File.separator + parameters.getCacheFileName();
     }
 
-    public PersistenceTokenCacheAccessAspect(PersistenceSettings persistenceSettings) {
+    private void createCacheFileIfNotExist() throws IOException {
+        Files.createDirectories(parameters.getCacheDirectoryPath());
+
+        (new File(getCacheFilePath())).createNewFile();
+    }
+
+    public PersistenceTokenCacheAccessAspect(PersistenceSettings persistenceSettings) throws IOException {
         this.parameters = persistenceSettings;
 
-        String cacheFilePath = getCacheFilePath(parameters);
+        createCacheFileIfNotExist();
 
-        lock = new CrossProcessCacheFileLock(getCacheLockFilePath(parameters),
+        String cacheFilePath = getCacheFilePath();
+
+        lock = new CrossProcessCacheFileLock(getCacheLockFilePath(),
                 persistenceSettings.getLockRetryDelayMilliseconds(),
                 persistenceSettings.getLockRetryNumber());
 
@@ -88,7 +96,7 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
     }
 
     public Long getCurrentCacheFileModifiedTimestamp() {
-        return new File(getCacheFilePath(parameters)).lastModified();
+        return new File(getCacheFilePath()).lastModified();
     }
 
     private boolean isCacheFileModifiedTimestampSupported() {
@@ -111,7 +119,9 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
                 }
             }
             byte[] data = cacheAccessor.read();
-            iTokenCacheAccessContext.tokenCache().deserialize(new String(data, StandardCharset.UTF_8));
+            if(data != null){
+                iTokenCacheAccessContext.tokenCache().deserialize(new String(data, StandardCharset.UTF_8));
+            }
 
             updateLastSeenCacheFileModifiedTimestamp();
 

@@ -3,13 +3,15 @@
 
 package com.microsoft.aad.msal4jextensions;
 
+import java.nio.file.Path;
+
 /**
  * An immutable class containing persistence settings for MSAL caches in various platforms.
  */
 public class PersistenceSettings {
 
     private String cacheFileName;
-    private String cacheDirectoryPath;
+    private Path cacheDirectoryPath;
 
     private String keychainService;
     private String keychainAccount;
@@ -28,7 +30,7 @@ public class PersistenceSettings {
     private int lockRetryNumber;
 
     private PersistenceSettings(String cacheFileName,
-                                String cacheDirectoryPath,
+                                Path cacheDirectoryPath,
                                 String keychainService,
                                 String keychainAccount,
                                 String keyringCollection,
@@ -68,7 +70,7 @@ public class PersistenceSettings {
     /**
      * @return The path of the directory containing the cache file.
      */
-    public String getCacheDirectoryPath() {
+    public Path getCacheDirectoryPath() {
         return cacheDirectoryPath;
     }
 
@@ -162,13 +164,30 @@ public class PersistenceSettings {
         }
     }
 
+    private static void validateNotNull(String parameter, Path path) {
+        if (path == null) {
+            throw new IllegalArgumentException(parameter + " can not be null");
+        }
+    }
+
+    /**
+     * Constructs an instance of builder associated with provided cache file.
+     *
+     * @param cacheFileName      The name of the cache file to use when reading/writing storage.
+     * @param cacheDirectoryPath The path of the directory containing the cache file.
+     * @return The augmented builder
+     */
+    public static Builder builder(String cacheFileName, Path cacheDirectoryPath) {
+        return new Builder(cacheFileName, cacheDirectoryPath);
+    }
+
     /**
      * An builder for {@link #PersistenceSettings} objects.
      */
     public static class Builder {
 
         private String cacheFileName;
-        private String cacheDirectoryPath;
+        private Path cacheDirectoryPath;
 
         private String keychainService;
         private String keychainAccount;
@@ -186,15 +205,9 @@ public class PersistenceSettings {
         private int lockRetryDelayMilliseconds = 100;
         private int lockRetryNumber = 60;
 
-        /**
-         * Constructs an instance of builder associated with provided cache file.
-         *
-         * @param cacheFileName      The name of the cache file to use when reading/writing storage.
-         * @param cacheDirectoryPath The path of the directory containing the cache file.
-         */
-        public Builder(String cacheFileName, String cacheDirectoryPath) {
+        private Builder(String cacheFileName, Path cacheDirectoryPath) {
             validateArgument("cacheFileName", cacheFileName);
-            validateArgument("cacheDirectoryPath", cacheDirectoryPath);
+            validateNotNull("cacheDirectoryPath", cacheDirectoryPath);
 
             this.cacheFileName = cacheFileName;
             this.cacheDirectoryPath = cacheDirectoryPath;

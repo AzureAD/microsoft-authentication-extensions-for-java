@@ -37,6 +37,10 @@ public class KeyChainAccessor implements CacheAccessor {
                             dataLength, data,
                             null);
 
+            if (status == SecurityLibrary.ERR_SEC_ITEM_NOT_FOUND) {
+                return null;
+            }
+
             if (status != SecurityLibrary.ERR_SEC_SUCCESS) {
                 throw new KeyChainAccessException(convertErrorCodeToMessage(status));
             }
@@ -48,7 +52,7 @@ public class KeyChainAccessor implements CacheAccessor {
     }
 
     @Override
-    public void write(byte[] data) {
+    public void write(byte[] data) throws IOException {
         Pointer[] itemRef = new Pointer[1];
         int status;
 
@@ -79,7 +83,7 @@ public class KeyChainAccessor implements CacheAccessor {
                 throw new KeyChainAccessException(convertErrorCodeToMessage(status));
             }
 
-            //new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
+            new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
 
         } finally {
             if (itemRef[0] != null) {
@@ -89,7 +93,7 @@ public class KeyChainAccessor implements CacheAccessor {
     }
 
     @Override
-    public void delete() {
+    public void delete() throws IOException {
         Pointer[] itemRef = new Pointer[1];
         try {
             int status = SecurityLibrary.library.SecKeychainFindGenericPassword(
@@ -114,7 +118,7 @@ public class KeyChainAccessor implements CacheAccessor {
                     throw new KeyChainAccessException(convertErrorCodeToMessage(status));
                 }
             }
-            //new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
+            new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
         } finally {
             if (itemRef[0] != null) {
                 SecurityLibrary.library.CFRelease(itemRef[0]);

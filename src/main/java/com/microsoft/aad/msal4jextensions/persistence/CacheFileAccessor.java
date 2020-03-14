@@ -17,16 +17,18 @@ import java.nio.file.attribute.FileTime;
  * Implementation of CacheAccessor based on File persistence
  */
 public class CacheFileAccessor implements CacheAccessor {
-    String cacheFilePath;
+    private String cacheFilePath;
+    private File cacheFile;
 
-    public CacheFileAccessor(String cacheFilePath) {
+    public CacheFileAccessor(String cacheFilePath) throws IOException {
         this.cacheFilePath = cacheFilePath;
+
+        cacheFile = new File(cacheFilePath);
+        cacheFile.createNewFile();
     }
 
     @Override
     public byte[] read() throws IOException {
-        File cacheFile = new File(cacheFilePath);
-        cacheFile.createNewFile();
 
         byte[] data = Files.readAllBytes(cacheFile.toPath());
 
