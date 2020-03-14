@@ -276,7 +276,7 @@ public class PersistenceSettings {
          * @param useUnprotectedFileAsCacheStorage boolean value
          * @return The augmented builder.
          */
-        public Builder setLinuxUnprotectedFileAsCacheStorage(boolean useUnprotectedFileAsCacheStorage) {
+        public Builder setLinuxUseUnprotectedFileAsCacheStorage(boolean useUnprotectedFileAsCacheStorage) {
             linuxUseUnprotectedFileAsCacheStorage = useUnprotectedFileAsCacheStorage;
 
             return this;
