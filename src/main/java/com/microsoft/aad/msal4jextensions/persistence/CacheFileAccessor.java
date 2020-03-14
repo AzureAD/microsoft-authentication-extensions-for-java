@@ -29,10 +29,9 @@ public class CacheFileAccessor implements CacheAccessor {
 
     @Override
     public byte[] read() throws IOException {
-
         byte[] data = Files.readAllBytes(cacheFile.toPath());
 
-        if (Platform.isWindows()) {
+        if (data != null && data.length > 0 && Platform.isWindows()) {
             data = Crypt32Util.cryptUnprotectData(data);
         }
 
