@@ -5,8 +5,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.microsoft.azure</groupId>
-    <artifactId>microsoft-authentication-extensions-for-java</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <artifactId>msal4j-persistence-extension</artifactId>
+    <version>0.1</version>
+    <packaging>jar</packaging>
+    <description>
+        Implementation of ITokenCacheAccessAspect interface defined in Java MSAL SDK (artifactId - msal4j)
+        for persistence of token cache in platform specific secret storage:
+        * Win - file encrypted with DPAPI
+        * Mac - key chain
+        * Linux - key ring
+    </description>
     <url>https://github.com/AzureAD/microsoft-authentication-extensions-for-java</url>
     <developers>
         <developer>
@@ -36,26 +44,7 @@
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>msal4j</artifactId>
-            <version>1.3.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.9</version>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.6</version>
+            <version>1.4.0</version>
         </dependency>
 
         <dependency>
@@ -74,6 +63,13 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

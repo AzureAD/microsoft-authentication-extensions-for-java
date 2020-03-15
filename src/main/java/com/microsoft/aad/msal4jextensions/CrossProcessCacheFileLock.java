@@ -36,9 +36,9 @@ class CrossProcessCacheFileLock {
     /**
      * Constructor
      *
-     * @param lockfileName          Path of the lock file
+     * @param lockfileName           Path of the lock file
      * @param retryDelayMilliseconds Delay between lock acquisition attempts in ms
-     * @param retryNumber           Number of attempts to acquire lock
+     * @param retryNumber            Number of attempts to acquire lock
      */
     CrossProcessCacheFileLock(String lockfileName, int retryDelayMilliseconds, int retryNumber) {
         lockFile = new File(lockfileName);
@@ -66,7 +66,7 @@ class CrossProcessCacheFileLock {
         lock(WRITE_MODE);
     }
 
-    private String getLockProcessThreadId(){
+    private String getLockProcessThreadId() {
         return "pid:" + ProcessHandle.current().pid() + " thread:" + Thread.currentThread().getId();
     }
 
@@ -105,18 +105,16 @@ class CrossProcessCacheFileLock {
             } catch (Exception ex) {
                 LOG.debug(getLockProcessThreadId() + " failed to acquire " + mode + " lock," +
                         " exception msg - " + ex.getMessage());
-
-                if (randomAccessFile != null) {
-                    try {
-                        randomAccessFile.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    releaseResources();
+                } catch (IOException e) {
+                    LOG.error(e.getMessage());
                 }
+
                 try {
                     Thread.sleep(retryDelayMilliseconds);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOG.error(e.getMessage());
                 }
             }
         }
@@ -132,12 +130,16 @@ class CrossProcessCacheFileLock {
      * @throws IOException
      */
     void unlock() throws IOException {
-        if (randomAccessFile != null) {
-            LOG.debug(getLockProcessThreadId() + " releasing " + mode + " lock");
+        LOG.debug(getLockProcessThreadId() + " releasing " + mode + " lock");
 
-            if(lock != null){
-                lock.release();
-            }
+        releaseResources();
+    }
+
+    private void releaseResources() throws IOException {
+        if (lock != null) {
+            lock.release();
+        }
+        if (randomAccessFile != null) {
             randomAccessFile.close();
         }
     }

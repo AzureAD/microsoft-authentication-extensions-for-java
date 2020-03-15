@@ -1,3 +1,8 @@
+Implementation of ITokenCacheAccessAspect interface defined in [Java MSAL SDK](https://github.com/AzureAD/microsoft-authentication-library-for-java)
+for persistence of token cache in platform specific secret storage:
+* Win - file encrypted with DPAPI
+* Mac - key chain
+* Linux - key ring
 
 # Contributing
 

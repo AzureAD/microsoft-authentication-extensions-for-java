@@ -119,7 +119,7 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
                 }
             }
             byte[] data = cacheAccessor.read();
-            if(data != null){
+            if (data != null) {
                 iTokenCacheAccessContext.tokenCache().deserialize(new String(data, StandardCharset.UTF_8));
             }
 
@@ -135,14 +135,18 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
 
     @Override
     public void afterCacheAccess(ITokenCacheAccessContext iTokenCacheAccessContext) {
-        if (isWriteAccess(iTokenCacheAccessContext)) {
-            try {
+        try {
+            if (isWriteAccess(iTokenCacheAccessContext)) {
                 cacheAccessor.write(iTokenCacheAccessContext.tokenCache().serialize().getBytes());
-
                 updateLastSeenCacheFileModifiedTimestamp();
+            }
+        } catch (IOException ex) {
+            LOG.error(ex.getMessage());
+        } finally {
+            try {
                 lock.unlock();
-            } catch (IOException ex) {
-                LOG.error(ex.getMessage());
+            } catch (IOException e) {
+                LOG.error(e.getMessage());
             }
         }
     }

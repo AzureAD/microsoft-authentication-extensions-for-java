@@ -3,7 +3,7 @@
 
 package com.microsoft.aad.msal4jextensions;
 
-import org.apache.commons.lang3.SystemUtils;
+import com.sun.jna.Platform;
 import org.junit.*;
 
 import java.io.*;
@@ -30,7 +30,7 @@ public class CacheLockTest {
         lockFilePath = java.nio.file.Paths.get(home, "testLock.lockfile").toString();
 
         String delimiter = ":";
-        if (SystemUtils.IS_OS_WINDOWS) {
+        if (Platform.isWindows()) {
             delimiter = ";";
         }
         folder = classes.toString() + delimiter + tests;
