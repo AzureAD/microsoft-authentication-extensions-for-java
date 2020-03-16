@@ -12,12 +12,12 @@ import com.sun.jna.Pointer;
  * It is used for storing and retrieving passwords and other secrets on Mac.
  * https://developer.apple.com/documentation/security/keychain_services/keychain_items
  */
-public interface SecurityLibrary extends Library {
+public interface ISecurityLibrary extends Library {
 
     int ERR_SEC_SUCCESS = 0;
     int ERR_SEC_ITEM_NOT_FOUND = -25300;
 
-    SecurityLibrary library = Native.load("Security", SecurityLibrary.class);
+    ISecurityLibrary library = Native.load("Security", ISecurityLibrary.class);
 
     /**
      * Adds a new generic password to a keychain.

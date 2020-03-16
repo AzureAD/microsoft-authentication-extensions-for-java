@@ -14,7 +14,7 @@ import java.nio.file.Files;
 /**
  * Implementation of CacheAccessor based on File persistence
  */
-public class CacheFileAccessor implements CacheAccessor {
+public class CacheFileAccessor implements ICacheAccessor {
     private String cacheFilePath;
     private File cacheFile;
 

@@ -4,7 +4,7 @@
 package com.microsoft.aad.msal4jextensions;
 
 import com.microsoft.aad.msal4jextensions.persistence.CacheFileAccessor;
-import com.microsoft.aad.msal4jextensions.persistence.CacheAccessor;
+import com.microsoft.aad.msal4jextensions.persistence.ICacheAccessor;
 import com.microsoft.aad.msal4jextensions.persistence.linux.KeyRingAccessor;
 import com.microsoft.aad.msal4jextensions.persistence.mac.KeyChainAccessor;
 import com.sun.jna.Platform;
@@ -31,7 +31,7 @@ public class CacheAccessorTest {
         String keyChainAccount = "MSAL_Test_Account";
         String keyChainService = "MSAL_Test_Service";
 
-        CacheAccessor cacheAccessor = new KeyChainAccessor(cacheFilePath, keyChainService, keyChainAccount);
+        ICacheAccessor cacheAccessor = new KeyChainAccessor(cacheFilePath, keyChainService, keyChainAccount);
 
         readWriteTest(cacheAccessor);
     }
@@ -39,7 +39,7 @@ public class CacheAccessorTest {
     @Test
     public void cacheFileIOTest() throws IOException {
 
-        CacheAccessor cacheAccessor = new CacheFileAccessor(cacheFilePath);
+        ICacheAccessor cacheAccessor = new CacheFileAccessor(cacheFilePath);
 
         readWriteTest(cacheAccessor);
     }
@@ -58,7 +58,7 @@ public class CacheAccessorTest {
         String attributeKey2 = "TestAttributeKey2";
         String attributeValue2 = "TestAttributeValue2";
 
-        CacheAccessor cacheAccessor = new KeyRingAccessor(cacheFilePath,
+        ICacheAccessor cacheAccessor = new KeyRingAccessor(cacheFilePath,
                 keyringCollection,
                 keyringSchemaName,
                 keyringSecretLabel,
@@ -70,7 +70,7 @@ public class CacheAccessorTest {
         readWriteTest(cacheAccessor);
     }
 
-    private void readWriteAssert(CacheAccessor cacheAccessor, String data) throws IOException {
+    private void readWriteAssert(ICacheAccessor cacheAccessor, String data) throws IOException {
         cacheAccessor.write(data.getBytes());
         String receivedString = new String(cacheAccessor.read());
 
@@ -78,7 +78,7 @@ public class CacheAccessorTest {
     }
 
 
-    private void readWriteTest(CacheAccessor cacheAccessor) throws IOException {
+    private void readWriteTest(ICacheAccessor cacheAccessor) throws IOException {
         try {
             cacheAccessor.delete();
 
