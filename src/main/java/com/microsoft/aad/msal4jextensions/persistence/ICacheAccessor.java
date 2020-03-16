@@ -8,7 +8,7 @@ import java.io.IOException;
 /**
  * Interface for cache data access operations.
  */
-public interface CacheAccessor {
+public interface ICacheAccessor {
 
     /**
      * Reads cache data

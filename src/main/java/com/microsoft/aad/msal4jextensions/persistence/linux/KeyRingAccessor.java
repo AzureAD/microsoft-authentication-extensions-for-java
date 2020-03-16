@@ -4,7 +4,7 @@
 package com.microsoft.aad.msal4jextensions.persistence.linux;
 
 import com.microsoft.aad.msal4jextensions.persistence.CacheFileAccessor;
-import com.microsoft.aad.msal4jextensions.persistence.CacheAccessor;
+import com.microsoft.aad.msal4jextensions.persistence.ICacheAccessor;
 import com.nimbusds.jose.util.StandardCharset;
 import com.sun.jna.Pointer;
 
@@ -15,7 +15,7 @@ import java.util.Base64;
 /**
  * Implementation of CacheAccessor based on KeyRing for Linux
  */
-public class KeyRingAccessor implements CacheAccessor {
+public class KeyRingAccessor implements ICacheAccessor {
 
     private String cacheFilePath;
 
@@ -69,7 +69,7 @@ public class KeyRingAccessor implements CacheAccessor {
 
         Pointer[] error = new Pointer[1];
 
-        String secret = SecurityLibrary.library.secret_password_lookup_sync(
+        String secret = ISecurityLibrary.library.secret_password_lookup_sync(
                 getLibSecretSchema(),
                 null,
                 error,
@@ -96,7 +96,7 @@ public class KeyRingAccessor implements CacheAccessor {
     private void write(byte[] data, String attributeValue1, String attributeValue2) throws IOException {
         Pointer[] error = new Pointer[1];
 
-        SecurityLibrary.library.secret_password_store_sync(
+        ISecurityLibrary.library.secret_password_store_sync(
                 getLibSecretSchema(),
                 keyringCollection,
                 keyringSecretLabel,
@@ -124,7 +124,7 @@ public class KeyRingAccessor implements CacheAccessor {
     private void delete(String attributeValue1, String attributeValue2) throws IOException {
         Pointer[] error = new Pointer[1];
 
-        SecurityLibrary.library.secret_password_clear_sync(
+        ISecurityLibrary.library.secret_password_clear_sync(
                 getLibSecretSchema(),
                 null,
                 error,
@@ -148,7 +148,7 @@ public class KeyRingAccessor implements CacheAccessor {
 
     private Pointer getLibSecretSchema() {
         if (libSecretSchema == Pointer.NULL) {
-            libSecretSchema = SecurityLibrary.library.secret_schema_new(
+            libSecretSchema = ISecurityLibrary.library.secret_schema_new(
                     keyringSchemaName,
                     SecretSchemaFlags.SECRET_SCHEMA_NONE,
                     attributeKey1,

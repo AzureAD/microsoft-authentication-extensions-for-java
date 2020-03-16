@@ -13,9 +13,9 @@ import com.sun.jna.Pointer;
  * It communicates with the "Secret Service" using D-Bus
  * https://developer.gnome.org/libsecret/0.18/
  */
-public interface SecurityLibrary extends Library {
+public interface ISecurityLibrary extends Library {
 
-    SecurityLibrary library = Native.load("libsecret-1", SecurityLibrary.class);
+    ISecurityLibrary library = Native.load("libsecret-1", ISecurityLibrary.class);
 
     /**
      * Creates a schema for saving secret, it represents a set of attributes that are stored with it
