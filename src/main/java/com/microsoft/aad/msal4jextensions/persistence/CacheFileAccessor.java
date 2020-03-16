@@ -10,8 +10,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.attribute.FileTime;
 
 /**
  * Implementation of CacheAccessor based on File persistence
@@ -54,9 +52,7 @@ public class CacheFileAccessor implements CacheAccessor {
         Files.deleteIfExists(new File(cacheFilePath).toPath());
     }
 
-    public void updateCacheFileLastModifiedTime() throws IOException {
-        FileTime fileTime = FileTime.fromMillis(System.currentTimeMillis());
-
-        Files.setLastModifiedTime(Paths.get(cacheFilePath), fileTime);
+    public void updateCacheFileLastModifiedTimeByWritingDummyData() throws IOException {
+        write(new byte[1]);
     }
 }

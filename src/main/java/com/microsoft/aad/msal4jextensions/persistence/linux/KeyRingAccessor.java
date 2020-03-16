@@ -48,7 +48,7 @@ public class KeyRingAccessor implements CacheAccessor {
         this.attributeValue2 = attributeValue2;
     }
 
-    public void verify() {
+    public void verify() throws IOException {
         String testAttributeValue1 = "testAttr1";
         String testAttributeValue2 = "testAttr2";
         String testData = "Test Data";
@@ -93,7 +93,7 @@ public class KeyRingAccessor implements CacheAccessor {
         return read(attributeValue1, attributeValue2);
     }
 
-    private void write(byte[] data, String attributeValue1, String attributeValue2) {
+    private void write(byte[] data, String attributeValue1, String attributeValue2) throws IOException {
         Pointer[] error = new Pointer[1];
 
         SecurityLibrary.library.secret_password_store_sync(
@@ -113,7 +113,7 @@ public class KeyRingAccessor implements CacheAccessor {
             throw new KeyRingAccessException("An error while saving secret to keyring, " +
                     "domain:" + err.domain + " code:" + err.code + " message:" + err.message);
         }
-        //new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
+        new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTimeByWritingDummyData();
     }
 
     @Override
@@ -121,7 +121,7 @@ public class KeyRingAccessor implements CacheAccessor {
         write(data, attributeValue1, attributeValue2);
     }
 
-    private void delete(String attributeValue1, String attributeValue2) {
+    private void delete(String attributeValue1, String attributeValue2) throws IOException {
         Pointer[] error = new Pointer[1];
 
         SecurityLibrary.library.secret_password_clear_sync(
@@ -138,7 +138,7 @@ public class KeyRingAccessor implements CacheAccessor {
             throw new KeyRingAccessException("An error while deleting secret from keyring, " +
                     "domain:" + err.domain + " code:" + err.code + " message:" + err.message);
         }
-        //new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
+        new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTimeByWritingDummyData();
     }
 
     @Override

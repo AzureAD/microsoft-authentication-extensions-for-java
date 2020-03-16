@@ -83,7 +83,7 @@ public class KeyChainAccessor implements CacheAccessor {
                 throw new KeyChainAccessException(convertErrorCodeToMessage(status));
             }
 
-            new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
+            new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTimeByWritingDummyData();
 
         } finally {
             if (itemRef[0] != null) {
@@ -118,7 +118,7 @@ public class KeyChainAccessor implements CacheAccessor {
                     throw new KeyChainAccessException(convertErrorCodeToMessage(status));
                 }
             }
-            new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
+            new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTimeByWritingDummyData();
         } finally {
             if (itemRef[0] != null) {
                 SecurityLibrary.library.CFRelease(itemRef[0]);
