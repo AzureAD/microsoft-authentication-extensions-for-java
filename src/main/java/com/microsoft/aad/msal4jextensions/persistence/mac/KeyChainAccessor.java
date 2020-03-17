@@ -7,7 +7,6 @@ import com.microsoft.aad.msal4jextensions.persistence.CacheFileAccessor;
 import com.microsoft.aad.msal4jextensions.persistence.ICacheAccessor;
 import com.sun.jna.Pointer;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -52,7 +51,7 @@ public class KeyChainAccessor implements ICacheAccessor {
     }
 
     @Override
-    public void write(byte[] data) throws IOException {
+    public void write(byte[] data) {
         Pointer[] itemRef = new Pointer[1];
         int status;
 
@@ -93,7 +92,7 @@ public class KeyChainAccessor implements ICacheAccessor {
     }
 
     @Override
-    public void delete() throws IOException {
+    public void delete() {
         Pointer[] itemRef = new Pointer[1];
         try {
             int status = ISecurityLibrary.library.SecKeychainFindGenericPassword(

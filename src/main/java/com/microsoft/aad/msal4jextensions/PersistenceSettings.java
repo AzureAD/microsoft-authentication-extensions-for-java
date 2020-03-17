@@ -182,7 +182,7 @@ public class PersistenceSettings {
     }
 
     /**
-     * An builder for {@link #PersistenceSettings} objects.
+     * An builder for {@link com.microsoft.aad.msal4jextensions.PersistenceSettings} objects.
      */
     public static class Builder {
 
@@ -224,8 +224,8 @@ public class PersistenceSettings {
             validateArgument("service", service);
             validateArgument("account", account);
 
-            this.keychainAccount = service;
-            this.keychainService = account;
+            this.keychainAccount = account;
+            this.keychainService = service;
 
             return this;
         }
@@ -307,9 +307,9 @@ public class PersistenceSettings {
         }
 
         /**
-         * Construct an immutable instance of {@link #PersistenceSettings}.
+         * Construct an immutable instance of {@link com.microsoft.aad.msal4jextensions.PersistenceSettings}.
          *
-         * @return An immutable instance of {@link #PersistenceSettings}.
+         * @return An immutable instance of {@link com.microsoft.aad.msal4jextensions.PersistenceSettings}.
          */
         public PersistenceSettings build() {
             PersistenceSettings persistenceSettings = new PersistenceSettings(

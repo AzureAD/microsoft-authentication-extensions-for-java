@@ -6,6 +6,7 @@ package com.microsoft.aad.msal4jextensions;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.management.ManagementFactory;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -66,8 +67,16 @@ class CrossProcessCacheFileLock {
         lock(WRITE_MODE);
     }
 
+    private String getProcessId(){
+        String vmName = ManagementFactory.getRuntimeMXBean().getName();
+
+        String pid = vmName.substring(0, vmName.indexOf("@"));
+
+        return pid;
+    }
+
     private String getLockProcessThreadId() {
-        return "pid:" + ProcessHandle.current().pid() + " thread:" + Thread.currentThread().getId();
+        return "pid:" + getProcessId() + " thread:" + Thread.currentThread().getId();
     }
 
     /**

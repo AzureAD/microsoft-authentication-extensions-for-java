@@ -3,8 +3,6 @@
 
 package com.microsoft.aad.msal4jextensions.persistence;
 
-import java.io.IOException;
-
 /**
  * Interface for cache data access operations.
  */
@@ -14,23 +12,18 @@ public interface ICacheAccessor {
      * Reads cache data
      *
      * @return Cache data
-     * @throws IOException
      */
-    byte[] read() throws IOException;
+    byte[] read();
 
     /**
      * Writes cache data
      *
      * @param data cache data
-     * @throws IOException
      */
-    void write(byte[] data) throws IOException;
+    void write(byte[] data);
 
     /**
      * Deletes the cache
-     *
-     * @throws IOException
      */
-    void delete() throws IOException;
-
+    void delete();
 }
