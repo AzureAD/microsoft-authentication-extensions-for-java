@@ -8,6 +8,7 @@
     <artifactId>msal4j-persistence-extension</artifactId>
     <version>0.1</version>
     <packaging>jar</packaging>
+    <name>msal4j-persistence-extension</name>
     <description>
         Implementation of ITokenCacheAccessAspect interface defined in Java MSAL SDK (artifactId - msal4j)
         for persistence of token cache in platform specific secret storage:
@@ -27,6 +28,10 @@
             <name>MIT License</name>
         </license>
     </licenses>
+
+    <scm>
+        <url>https://github.com/AzureAD/microsoft-authentication-extensions-for-java</url>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
