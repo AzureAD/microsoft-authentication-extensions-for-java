@@ -1,4 +1,5 @@
 # PersistenceTokenCacheAccessAspect
+[![javadoc](https://javadoc.io/badge2/com.microsoft.azure/msal4j-persistence-extension/javadoc.svg)](https://javadoc.io/doc/com.microsoft.azure/msal4j-persistence-extension)
 
 Implementation of ITokenCacheAccessAspect interface defined in [Java MSAL SDK](https://github.com/AzureAD/microsoft-authentication-library-for-java)
 for persistence of token cache in platform specific secret storage:
