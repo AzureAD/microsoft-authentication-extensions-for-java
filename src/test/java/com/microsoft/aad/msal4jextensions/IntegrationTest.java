@@ -46,8 +46,8 @@ public class IntegrationTest {
                         .build();
     }
 
-    @Test
-    public void silentlyGetPersistedTokens() throws IOException, ExecutionException, InterruptedException {
+    // @Test
+    public void silentlyGetPersistedTokensIntegrationTest() throws IOException, ExecutionException, InterruptedException {
 
         ConfidentialClientApplication app = createConfidentialClient();
         IAuthenticationResult interactiveResult = acquireTokenInteractively(app);
