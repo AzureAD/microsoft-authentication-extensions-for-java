@@ -182,7 +182,7 @@ public class PersistenceSettings {
     }
 
     /**
-     * An builder for {@link #PersistenceSettings} objects.
+     * An builder for {@link com.microsoft.aad.msal4jextensions.PersistenceSettings} objects.
      */
     public static class Builder {
 
@@ -307,9 +307,9 @@ public class PersistenceSettings {
         }
 
         /**
-         * Construct an immutable instance of {@link #PersistenceSettings}.
+         * Construct an immutable instance of {@link com.microsoft.aad.msal4jextensions.PersistenceSettings}.
          *
-         * @return An immutable instance of {@link #PersistenceSettings}.
+         * @return An immutable instance of {@link com.microsoft.aad.msal4jextensions.PersistenceSettings}.
          */
         public PersistenceSettings build() {
             PersistenceSettings persistenceSettings = new PersistenceSettings(

@@ -18,18 +18,22 @@ public class CacheFileAccessor implements ICacheAccessor {
     private String cacheFilePath;
     private File cacheFile;
 
-    public CacheFileAccessor(String cacheFilePath) throws IOException {
+    public CacheFileAccessor(String cacheFilePath) {
         this.cacheFilePath = cacheFilePath;
 
         cacheFile = new File(cacheFilePath);
     }
 
     @Override
-    public byte[] read() throws IOException {
+    public byte[] read() {
         byte[] data = null;
-        
-        if(cacheFile.exists()) {
-            data = Files.readAllBytes(cacheFile.toPath());
+
+        if (cacheFile.exists()) {
+            try {
+                data = Files.readAllBytes(cacheFile.toPath());
+            } catch (IOException e) {
+                throw new CacheFileAccessException("Failed to read Cache File", e);
+            }
 
             if (data != null && data.length > 0 && Platform.isWindows()) {
                 data = Crypt32Util.cryptUnprotectData(data);
@@ -40,22 +44,28 @@ public class CacheFileAccessor implements ICacheAccessor {
     }
 
     @Override
-    public void write(byte[] data) throws IOException {
+    public void write(byte[] data) {
         if (Platform.isWindows()) {
             data = Crypt32Util.cryptProtectData(data);
         }
 
         try (FileOutputStream stream = new FileOutputStream(cacheFilePath)) {
             stream.write(data);
+        } catch (IOException e) {
+            throw new CacheFileAccessException("Failed to write to Cache File", e);
         }
     }
 
     @Override
-    public void delete() throws IOException {
-        Files.deleteIfExists(new File(cacheFilePath).toPath());
+    public void delete() {
+        try {
+            Files.deleteIfExists(new File(cacheFilePath).toPath());
+        } catch (IOException e) {
+            throw new CacheFileAccessException("Failed to delete Cache File", e);
+        }
     }
 
-    public void updateCacheFileLastModifiedTimeByWritingDummyData() throws IOException {
+    public void updateCacheFileLastModifiedTimeByWritingDummyData() {
         write(new byte[1]);
     }
 }

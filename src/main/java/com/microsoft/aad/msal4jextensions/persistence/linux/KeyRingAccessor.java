@@ -93,7 +93,7 @@ public class KeyRingAccessor implements ICacheAccessor {
         return read(attributeValue1, attributeValue2);
     }
 
-    private void write(byte[] data, String attributeValue1, String attributeValue2) throws IOException {
+    private void write(byte[] data, String attributeValue1, String attributeValue2) {
         Pointer[] error = new Pointer[1];
 
         ISecurityLibrary.library.secret_password_store_sync(
@@ -117,11 +117,11 @@ public class KeyRingAccessor implements ICacheAccessor {
     }
 
     @Override
-    public void write(byte[] data) throws IOException {
+    public void write(byte[] data) {
         write(data, attributeValue1, attributeValue2);
     }
 
-    private void delete(String attributeValue1, String attributeValue2) throws IOException {
+    private void delete(String attributeValue1, String attributeValue2) {
         Pointer[] error = new Pointer[1];
 
         ISecurityLibrary.library.secret_password_clear_sync(
@@ -142,7 +142,7 @@ public class KeyRingAccessor implements ICacheAccessor {
     }
 
     @Override
-    public void delete() throws IOException {
+    public void delete() {
         delete(attributeValue1, attributeValue2);
     }
 
