@@ -224,8 +224,8 @@ public class PersistenceSettings {
             validateArgument("service", service);
             validateArgument("account", account);
 
-            this.keychainAccount = service;
-            this.keychainService = account;
+            this.keychainAccount = account;
+            this.keychainService = service;
 
             return this;
         }

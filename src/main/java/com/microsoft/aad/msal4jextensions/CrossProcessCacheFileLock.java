@@ -3,6 +3,13 @@
 
 package com.microsoft.aad.msal4jextensions;
 
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.Platform;
+import com.sun.jna.platform.win32.Kernel32;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -10,9 +17,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Cross process lock based on OS level file lock.
@@ -67,7 +71,13 @@ class CrossProcessCacheFileLock {
     }
 
     private String getLockProcessThreadId() {
-        return "pid:" + ProcessHandle.current().pid() + " thread:" + Thread.currentThread().getId();
+        int pid;
+        if (Platform.isWindows()) {
+            pid = Kernel32.INSTANCE.GetCurrentProcessId();
+        } else {
+            pid = CLibrary.INSTANCE.getpid();
+        }
+        return "pid:" + pid + " thread:" + Thread.currentThread().getId();
     }
 
     /**
@@ -143,4 +153,10 @@ class CrossProcessCacheFileLock {
             randomAccessFile.close();
         }
     }
+
+    private interface CLibrary extends Library {
+        CLibrary INSTANCE = Native.load("c", CLibrary.class);
+        int getpid ();
+    }
+
 }
