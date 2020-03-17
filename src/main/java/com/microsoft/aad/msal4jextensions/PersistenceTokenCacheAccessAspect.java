@@ -45,7 +45,9 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
     private void createCacheFileIfNotExist() throws IOException {
         Files.createDirectories(parameters.getCacheDirectoryPath());
 
-        (new File(getCacheFilePath())).createNewFile();
+        if(new File(getCacheFilePath()).createNewFile()){
+            LOG.debug("MSAL cache file was created, path - " + getCacheFilePath());
+        }
     }
 
     public PersistenceTokenCacheAccessAspect(PersistenceSettings persistenceSettings) throws IOException {
@@ -100,10 +102,6 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
         return new File(getCacheFilePath()).lastModified();
     }
 
-    private boolean isCacheFileModifiedTimestampSupported() {
-        return true;
-    }
-
     @Override
     public void beforeCacheAccess(ITokenCacheAccessContext iTokenCacheAccessContext) {
         try {
@@ -111,9 +109,8 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
                 lock.writeLock();
             } else {
                 Long currentCacheFileModifiedTimestamp = getCurrentCacheFileModifiedTimestamp();
-                if (isCacheFileModifiedTimestampSupported() &&
-                        currentCacheFileModifiedTimestamp != null &&
-                        currentCacheFileModifiedTimestamp == lastSeenCacheFileModifiedTimestamp) {
+                if (currentCacheFileModifiedTimestamp != null &&
+                        currentCacheFileModifiedTimestamp.equals(lastSeenCacheFileModifiedTimestamp)) {
                     return;
                 } else {
                     lock.readLock();
@@ -138,7 +135,7 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
     public void afterCacheAccess(ITokenCacheAccessContext iTokenCacheAccessContext) {
         try {
             if (isWriteAccess(iTokenCacheAccessContext)) {
-                cacheAccessor.write(iTokenCacheAccessContext.tokenCache().serialize().getBytes());
+                cacheAccessor.write(iTokenCacheAccessContext.tokenCache().serialize().getBytes(StandardCharset.UTF_8));
                 updateLastSeenCacheFileModifiedTimestamp();
             }
         } catch (IOException ex) {

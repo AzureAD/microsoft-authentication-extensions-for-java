@@ -22,15 +22,18 @@ public class CacheFileAccessor implements ICacheAccessor {
         this.cacheFilePath = cacheFilePath;
 
         cacheFile = new File(cacheFilePath);
-        cacheFile.createNewFile();
     }
 
     @Override
     public byte[] read() throws IOException {
-        byte[] data = Files.readAllBytes(cacheFile.toPath());
+        byte[] data = null;
+        
+        if(cacheFile.exists()) {
+            data = Files.readAllBytes(cacheFile.toPath());
 
-        if (data != null && data.length > 0 && Platform.isWindows()) {
-            data = Crypt32Util.cryptUnprotectData(data);
+            if (data != null && data.length > 0 && Platform.isWindows()) {
+                data = Crypt32Util.cryptUnprotectData(data);
+            }
         }
 
         return data;
