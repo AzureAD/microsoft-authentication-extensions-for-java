@@ -1,3 +1,10 @@
+# Microsoft Authentication Library (MSAL) Extensions for Java
+
+The extensions library for MSAL Java supports persistence of the cache to disk in encrypted form where the platform supports this. This is available for Mac, Windows and Linux. On Linux we depend on Libsecret and any place where libsecret is not available encryption is not supported. On Mac and Windows encryption support is built into the OS.
+
+# Maven
+You can find the latest pacakge in the [Maven repository](https://mvnrepository.com/artifact/com.microsoft.azure/msal4j-persistence-extension).
+
 # PersistenceTokenCacheAccessAspect
 
 Implementation of ITokenCacheAccessAspect interface defined in [Java MSAL SDK](https://github.com/AzureAD/microsoft-authentication-library-for-java)
