@@ -49,6 +49,12 @@ class CacheFileWriterRunnable implements Runnable {
 
             Files.write(file.toPath(), data.getBytes());
 
+            end = System.currentTimeMillis();
+
+            try (FileOutputStream os = new FileOutputStream(lockHoldingIntervalsFilePath, true)) {
+                os.write((start + "-" + end + "\n").getBytes());
+            }
+
           //  Thread.sleep(500);
 
 /*            try (FileOutputStream os = new FileOutputStream(file, true)) {
@@ -64,12 +70,6 @@ class CacheFileWriterRunnable implements Runnable {
             ex.printStackTrace();
         } finally {
             try {
-                end = System.currentTimeMillis();
-
-                try (FileOutputStream os = new FileOutputStream(lockHoldingIntervalsFilePath, true)) {
-                    os.write((start + "-" + end + "\n").getBytes());
-                }
-
                 lock.unlock();
             } catch (IOException e) {
                 System.out.println("Failed to unlock");

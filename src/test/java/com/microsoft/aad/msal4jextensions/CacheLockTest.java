@@ -73,7 +73,7 @@ public class CacheLockTest {
 
     @Test
     public void multipleThreadsWritingToFile() throws IOException, InterruptedException {
-        int NUM_OF_THREADS = 100;
+        int NUM_OF_THREADS = 200;
 
         new File(testFilePath).delete();
         new File(lockHoldingIntervalsFilePath).delete();
