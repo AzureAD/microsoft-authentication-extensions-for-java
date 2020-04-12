@@ -14,8 +14,10 @@ public class CacheFileWriter {
         lockFilePath = args[1];
         filePath = args[2];
 
+        String lockHoldingIntervalsFilePath = args[3];
+
         CacheFileWriterRunnable cacheFileWriterRunnable =
-                new CacheFileWriterRunnable(executionId, lockFilePath, filePath);
+                new CacheFileWriterRunnable(executionId, lockFilePath, filePath, lockHoldingIntervalsFilePath);
 
         cacheFileWriterRunnable.run();
     }

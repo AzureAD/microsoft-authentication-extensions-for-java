@@ -2,8 +2,6 @@ package com.microsoft.aad.msal4jextensions;
 
 import com.microsoft.aad.msal4j.*;
 import org.junit.Assert;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
@@ -41,9 +39,9 @@ public class IntegrationTest {
                 ClientCredentialFactory.createFromSecret(TestData.CONFIDENTIAL_CLIENT_SECRET);
 
         return ConfidentialClientApplication.builder(TestData.CONFIDENTIAL_CLIENT_ID, clientCredential)
-                        .authority(TestData.TENANT_SPECIFIC_AUTHORITY)
-                        .setTokenCacheAccessAspect(createPersistenceAspect())
-                        .build();
+                .authority(TestData.TENANT_SPECIFIC_AUTHORITY)
+                .setTokenCacheAccessAspect(createPersistenceAspect())
+                .build();
     }
 
     // @Test

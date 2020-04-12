@@ -50,8 +50,7 @@ public class KeyChainAccessor implements ICacheAccessor {
         }
     }
 
-    @Override
-    public void write(byte[] data) {
+    private int writeNoRetry(byte[] data) {
         Pointer[] itemRef = new Pointer[1];
         int status;
 
@@ -64,31 +63,63 @@ public class KeyChainAccessor implements ICacheAccessor {
 
             if (status != ISecurityLibrary.ERR_SEC_SUCCESS
                     && status != ISecurityLibrary.ERR_SEC_ITEM_NOT_FOUND) {
+                System.out.println(
+                        "< 1 =============================================================== STATUS - "
+                                + convertErrorCodeToMessage(status) );
                 throw new KeyChainAccessException(convertErrorCodeToMessage(status));
             }
 
-            if (itemRef[0] != null) {
+            //if (itemRef[0] != null) {
+            if (status == ISecurityLibrary.ERR_SEC_SUCCESS && itemRef[0] != null) {
+
                 status = ISecurityLibrary.library.SecKeychainItemModifyContent(
                         itemRef[0], null, data.length, data);
-            } else {
+                //  } else {
+            }else if(status == ISecurityLibrary.ERR_SEC_ITEM_NOT_FOUND){
                 status = ISecurityLibrary.library.SecKeychainAddGenericPassword(
-                        Pointer.NULL,
+                        null,
                         serviceNameBytes.length, serviceNameBytes,
                         accountNameBytes.length, accountNameBytes,
                         data.length, data, null);
             }
-
-            if (status != ISecurityLibrary.ERR_SEC_SUCCESS) {
-                throw new KeyChainAccessException(convertErrorCodeToMessage(status));
-            }
-
-            new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTimeByWritingDummyData();
 
         } finally {
             if (itemRef[0] != null) {
                 ISecurityLibrary.library.CFRelease(itemRef[0]);
             }
         }
+        return status;
+    }
+
+    @Override
+    public void write(byte[] data) {
+        int NUM_OF_RETRIES = 1;
+        int RETRY_DELAY = 100;
+        int status = 0;
+
+        for(int i=0; i<NUM_OF_RETRIES; i++){
+            status = writeNoRetry(data);
+
+            if (status == ISecurityLibrary.ERR_SEC_SUCCESS) {
+                new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTimeByWritingDummyData();
+/*                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }*/
+                return;
+            }
+/*            try {
+                Thread.sleep(RETRY_DELAY);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }*/
+        }
+
+        System.out.println(
+                        "< !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ALL ATTEMPT WRITE FAILED - "
+                                + convertErrorCodeToMessage(status));
+        throw new KeyChainAccessException(convertErrorCodeToMessage(status));
     }
 
     @Override
