@@ -6,20 +6,18 @@ package com.microsoft.aad.msal4jextensions;
 public class KeyChainWriter {
 
     public static void main(String[] args) throws Exception {
-        String filePath;
-        String lockFilePath;
-        String executionId;
+        String executionId = args[0];
+        String lockFilePath = args[1];
+        String filePath = args[2];
+        String lockHoldingIntervalsFilePath = args[3];
 
-        executionId = args[0];
-        lockFilePath = args[1];
-        filePath = args[2];
-
-        String serviceName = args[3];
-        String accountName = args[4];
+        String serviceName = args[4];
+        String accountName = args[5];
 
         try {
             KeyChainWriterRunnable keyChainWriterRunnable =
-                    new KeyChainWriterRunnable(executionId, lockFilePath, filePath, serviceName, accountName);
+                    new KeyChainWriterRunnable(executionId, lockFilePath, filePath, lockHoldingIntervalsFilePath,
+                            serviceName, accountName);
 
             keyChainWriterRunnable.run();
             System.out.println("executionId - " + executionId + " SUCCESS");
