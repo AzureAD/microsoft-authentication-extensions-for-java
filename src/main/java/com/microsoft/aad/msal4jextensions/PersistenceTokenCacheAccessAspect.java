@@ -81,7 +81,9 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
                         parameters.getKeyringAttribute2Key(),
                         parameters.getKeyringAttribute2Value());
 
+                lock.writeLock();
                 ((KeyRingAccessor) cacheAccessor).verify();
+                lock.unlock();
             }
         }
     }
@@ -135,6 +137,7 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
     public void afterCacheAccess(ITokenCacheAccessContext iTokenCacheAccessContext) {
         try {
             if (isWriteAccess(iTokenCacheAccessContext)) {
+                lock.writeLock();
                 cacheAccessor.write(iTokenCacheAccessContext.tokenCache().serialize().getBytes(StandardCharset.UTF_8));
                 updateLastSeenCacheFileModifiedTimestamp();
             }
