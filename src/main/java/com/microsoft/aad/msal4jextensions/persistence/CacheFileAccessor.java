@@ -97,7 +97,7 @@ public class CacheFileAccessor implements ICacheAccessor {
         try {
             Files.setLastModifiedTime(Paths.get(cacheFilePath), fileTime);
         } catch (IOException e) {
-            LOG.error("Failed to set lastModified time on Cache File", e);
+            throw new CacheFileAccessException("Failed to set lastModified time on Cache File", e);
         }
     }
 }
