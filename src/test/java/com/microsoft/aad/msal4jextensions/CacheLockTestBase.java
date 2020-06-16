@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,7 +55,7 @@ public class CacheLockTestBase {
         }
     }
 
-    void validateResult(String data, int expectedNum) throws IOException {
+    void validateResult(String data, int expectedNum) {
         System.out.println("DATA TO VALIDATE: ");
         System.out.println(data);
 
@@ -105,11 +106,13 @@ public class CacheLockTestBase {
             System.out.println("lock intervals NUM = " + list.size());
         }
 
-        Collections.sort(list, (a, b) -> Long.compare(a[0], b[0]));
+        list.sort(Comparator.comparingLong(a -> a[0]));
 
+        int sum = 0;
         Long[] prev = null;
         for (Long[] interval : list) {
             Assert.assertTrue(interval[0] <= interval[1]);
+            sum += interval[1] - interval[0];
             if (prev != null) {
                 if (interval[0] < prev[1]) {
                     System.out.println("lock acquisition intersection detected");
@@ -118,6 +121,7 @@ public class CacheLockTestBase {
             }
             prev = interval;
         }
+        System.out.println("average lock holding time in ms - " + sum/list.size());
     }
 
     private String readFile(String filePath) throws IOException {

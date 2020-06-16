@@ -1,12 +1,10 @@
 package com.microsoft.aad.msal4jextensions;
 
 import com.microsoft.aad.msal4jextensions.persistence.ICacheAccessor;
-import com.microsoft.aad.msal4jextensions.persistence.linux.KeyRingAccessor;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Random;
 
 public class CacheWriterRunnable implements Runnable {
@@ -29,13 +27,13 @@ public class CacheWriterRunnable implements Runnable {
             String id = jvmName + ":" + Thread.currentThread().getId();
 
             byte[] data = cacheAccessor.read();
+
             String strData = (data != null) ? new String(data, StandardCharsets.UTF_8) : "";
             strData += "< " + id + "\n";
-
-            Random rand = new Random();
-            Thread.sleep(rand.nextInt(100));
-
             strData += "> " + id + "\n";
+
+            // in average deserialize/serialize of token cache with 100 tokens takes 130 ms
+            Thread.sleep(150);
 
             cacheAccessor.write(strData.getBytes(StandardCharsets.UTF_8));
             end = System.currentTimeMillis();

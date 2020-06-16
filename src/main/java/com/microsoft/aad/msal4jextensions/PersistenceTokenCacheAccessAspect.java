@@ -35,7 +35,7 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
     private PersistenceSettings parameters;
 
     private String getCacheLockFilePath() {
-        return parameters.getCacheDirectoryPath() + File.separator + ".lock";
+        return parameters.getCacheDirectoryPath() + File.separator + ".lockfile";
     }
 
     private String getCacheFilePath() {
@@ -94,7 +94,7 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
         return !isWriteAccess(iTokenCacheAccessContext);
     }
 
-    private void updateLastSeenCacheFileModifiedTimestamp() throws IOException {
+    private void updateLastSeenCacheFileModifiedTimestamp() {
         lastSeenCacheFileModifiedTimestamp = getCurrentCacheFileModifiedTimestamp();
     }
 
@@ -138,8 +138,6 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
                 cacheAccessor.write(iTokenCacheAccessContext.tokenCache().serialize().getBytes(StandardCharset.UTF_8));
                 updateLastSeenCacheFileModifiedTimestamp();
             }
-        } catch (IOException ex) {
-            LOG.error(ex.getMessage());
         } finally {
             try {
                 lock.unlock();
