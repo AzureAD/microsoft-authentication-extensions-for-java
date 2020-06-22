@@ -93,10 +93,10 @@ class CrossProcessCacheFileLock {
             try {
                 LOG.debug(getLockProcessThreadId() + " acquiring " + mode + " file lock");
 
-                lockFile.createNewFile();
-
                 fileChannel = FileChannel.open(lockFile.toPath(),
                         StandardOpenOption.READ,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.DELETE_ON_CLOSE,
                         StandardOpenOption.SYNC,
                         StandardOpenOption.WRITE);
 
@@ -147,13 +147,6 @@ class CrossProcessCacheFileLock {
         LOG.debug(getLockProcessThreadId() + " releasing " + lockMode + " lock");
 
         releaseResources();
-
-        try {
-            Files.deleteIfExists(lockFile.toPath());
-        }
-        catch (IOException ex){
-            LOG.error(ex.getMessage());
-        }
     }
 
     private void releaseResources() throws IOException {

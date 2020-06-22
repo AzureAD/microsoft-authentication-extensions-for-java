@@ -172,8 +172,10 @@ public class CacheLockTestBase {
 
             String mvnArgs = ("Process_" + i) + " " + writerClassArgs;
 
+            String mvn = Platform.isWindows() ? "mvn.bat" : "mvn";
+
             String[] mvnCommand =
-                    new String[]{"mvn", "exec:java",
+                    new String[]{mvn, "exec:java",
                             "-Dexec.mainClass=" + writerClass,
                             "-Dexec.classpathScope=test",
                             "-Dexec.args=" + mvnArgs};

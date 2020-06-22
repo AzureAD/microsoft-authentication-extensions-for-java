@@ -54,9 +54,17 @@ public class CacheFileAccessor implements ICacheAccessor {
     public void write(byte[] data) {
         if (Platform.isWindows()) {
             data = Crypt32Util.cryptProtectData(data);
-        }
 
-        writeAtomic(data);
+            try (FileOutputStream stream = new FileOutputStream(cacheFile)) {
+                stream.write(data);
+            }
+            catch (IOException e) {
+                throw new CacheFileAccessException("Failed to write to Cache File", e);
+            }
+        }
+        else {
+            writeAtomic(data);
+        }
     }
 
     private void writeAtomic(byte[] data) {
