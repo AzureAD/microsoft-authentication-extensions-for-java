@@ -63,6 +63,7 @@ class CrossProcessCacheFileLock {
             try {
                 fileCreated = lockFile.createNewFile();
             } catch (IOException ex) {
+                LOG.error(ex.getMessage());
             }
             if (fileCreated) {
                 return true;
@@ -77,7 +78,7 @@ class CrossProcessCacheFileLock {
         try {
             Thread.sleep(retryDelayMilliseconds);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
         }
     }
 
