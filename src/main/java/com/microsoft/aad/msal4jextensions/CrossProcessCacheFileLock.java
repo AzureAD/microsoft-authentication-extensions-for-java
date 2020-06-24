@@ -20,11 +20,6 @@ import org.slf4j.LoggerFactory;
  * Cross process lock based on OS level file lock.
  */
 class CrossProcessCacheFileLock {
-    enum LockMode {
-        SHARED,
-        EXCLUSIVE
-    }
-
     private final static Logger LOG = LoggerFactory.getLogger(CrossProcessCacheFileLock.class);
 
     private int retryDelayMilliseconds;
@@ -32,11 +27,11 @@ class CrossProcessCacheFileLock {
 
     private File lockFile;
 
-    private LockMode lockMode;
-
     private FileLock lock;
 
     private FileChannel fileChannel;
+
+    private boolean locked;
 
     /**
      * Constructor
@@ -47,28 +42,9 @@ class CrossProcessCacheFileLock {
      */
     CrossProcessCacheFileLock(String lockfileName, int retryDelayMilliseconds, int retryNumber) {
         lockFile = new File(lockfileName);
-        lockFile.deleteOnExit();
 
         this.retryDelayMilliseconds = retryDelayMilliseconds;
         this.retryNumber = retryNumber;
-    }
-
-    /**
-     * Acquire read lock - can be shared by multiple readers
-     *
-     * @throws CacheFileLockAcquisitionException if failed to acquire lock
-     */
-    void readLock() throws CacheFileLockAcquisitionException {
-        lock(LockMode.SHARED);
-    }
-
-    /**
-     * Acquire write lock - exclusive access
-     *
-     * @throws CacheFileLockAcquisitionException if failed to acquire lock
-     */
-    void writeLock() throws CacheFileLockAcquisitionException {
-        lock(LockMode.EXCLUSIVE);
     }
 
     private String getProcessId() {
@@ -82,30 +58,48 @@ class CrossProcessCacheFileLock {
     }
 
     /**
-     * Tries to acquire OS lock for lock file
+     * Tries to acquire lock by creating lock file,
+     * in case of failure try to acquire OS lock for lock file
      * Retries {@link #retryNumber} times with {@link #retryDelayMilliseconds} delay
      *
      * @throws CacheFileLockAcquisitionException if the lock was not obtained.
      */
-    private void lock(LockMode mode) throws CacheFileLockAcquisitionException {
+    void lock() throws CacheFileLockAcquisitionException {
+        boolean fileCreated = false;
 
         for (int tryCount = 0; tryCount < retryNumber; tryCount++) {
             try {
-                LOG.debug(getLockProcessThreadId() + " acquiring " + mode + " file lock");
+                fileCreated = lockFile.createNewFile();
+            } catch (IOException ex) {
+            }
+            if (fileCreated) {
+                break;
+            } else {
+                try {
+                    Thread.sleep(retryDelayMilliseconds);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if (!fileCreated) {
+            LOG.debug(getLockProcessThreadId() + " Failed to create lock file!");
+        }
 
+        for (int tryCount = 0; tryCount < retryNumber; tryCount++) {
+            try {
+                lockFile.createNewFile();
+
+                LOG.debug(getLockProcessThreadId() + " acquiring file lock");
                 fileChannel = FileChannel.open(lockFile.toPath(),
                         StandardOpenOption.READ,
-                        StandardOpenOption.CREATE,
-                        StandardOpenOption.DELETE_ON_CLOSE,
                         StandardOpenOption.SYNC,
                         StandardOpenOption.WRITE);
 
-                lock = fileChannel.tryLock(0L, Long.MAX_VALUE, LockMode.SHARED == mode);
+                lock = fileChannel.tryLock();
                 if (lock == null) {
                     throw new IllegalStateException("Lock is not available");
                 }
-
-                lockMode = lock.isShared() ? LockMode.SHARED : LockMode.EXCLUSIVE;
 
                 String jvmName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
 
@@ -114,10 +108,12 @@ class CrossProcessCacheFileLock {
                         getBytes(StandardCharsets.UTF_8));
                 fileChannel.write(buff);
 
-                LOG.debug(getLockProcessThreadId() + " acquired file lock, isShared - " + lock.isShared());
+                LOG.debug(getLockProcessThreadId() + " acquired OK file lock");
+                locked = true;
                 return;
+
             } catch (Exception ex) {
-                LOG.debug(getLockProcessThreadId() + " failed to acquire " + mode + " lock," +
+                LOG.debug(getLockProcessThreadId() + " failed to acquire lock," +
                         " exception msg - " + ex.getMessage());
                 try {
                     releaseResources();
@@ -132,10 +128,10 @@ class CrossProcessCacheFileLock {
                 }
             }
         }
-        LOG.error(getLockProcessThreadId() + " failed to acquire " + mode + " lock");
+        LOG.error(getLockProcessThreadId() + " failed to acquire lock");
 
         throw new CacheFileLockAcquisitionException(
-                getLockProcessThreadId() + " failed to acquire " + mode + " lock");
+                getLockProcessThreadId() + " failed to acquire lock");
     }
 
     /**
@@ -144,9 +140,19 @@ class CrossProcessCacheFileLock {
      * @throws IOException
      */
     void unlock() throws IOException {
-        LOG.debug(getLockProcessThreadId() + " releasing " + lockMode + " lock");
+        LOG.debug(getLockProcessThreadId() + " releasing lock");
 
         releaseResources();
+
+        if (locked) {
+            deleteLockFile();
+        }
+    }
+
+    private void deleteLockFile() throws IOException {
+        if (!Files.deleteIfExists(lockFile.toPath())) {
+            LOG.debug(getLockProcessThreadId() + " FAILED to delete lock file");
+        }
     }
 
     private void releaseResources() throws IOException {

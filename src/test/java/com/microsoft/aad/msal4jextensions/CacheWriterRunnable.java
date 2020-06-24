@@ -16,11 +16,11 @@ public class CacheWriterRunnable implements Runnable {
 
     @Override
     public void run() {
-        long start;
-        long end;
+        long start = 0;
+        long end = 0;
 
         try {
-            lock.writeLock();
+            lock.lock();
             start = System.currentTimeMillis();
 
             String jvmName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
@@ -37,17 +37,17 @@ public class CacheWriterRunnable implements Runnable {
 
             cacheAccessor.write(strData.getBytes(StandardCharsets.UTF_8));
             end = System.currentTimeMillis();
-
-            try (FileOutputStream os = new FileOutputStream(lockHoldingIntervalsFilePath, true)) {
-                os.write((start + "-" + end + "\n").getBytes());
-            }
-
         } catch (Exception ex) {
             System.out.println("File write failure " + ex.getMessage());
             ex.printStackTrace();
         } finally {
             try {
                 lock.unlock();
+                if(start > 0 && end > 0) {
+                    try (FileOutputStream os = new FileOutputStream(lockHoldingIntervalsFilePath, true)) {
+                        os.write((start + "-" + end + "\n").getBytes());
+                    }
+                }
             } catch (IOException e) {
                 System.out.println("Failed to unlock");
                 e.printStackTrace();

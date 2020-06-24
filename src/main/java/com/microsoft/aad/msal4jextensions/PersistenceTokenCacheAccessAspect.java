@@ -106,14 +106,14 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
     public void beforeCacheAccess(ITokenCacheAccessContext iTokenCacheAccessContext) {
         try {
             if (isWriteAccess(iTokenCacheAccessContext)) {
-                lock.writeLock();
+                lock.lock();
             } else {
                 Long currentCacheFileModifiedTimestamp = getCurrentCacheFileModifiedTimestamp();
                 if (currentCacheFileModifiedTimestamp != null &&
                         currentCacheFileModifiedTimestamp.equals(lastSeenCacheFileModifiedTimestamp)) {
                     return;
                 } else {
-                    lock.readLock();
+                    lock.lock();
                 }
             }
             byte[] data = cacheAccessor.read();
