@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Cross process lock based on OS level file lock.
+ * Cross process lock based on lock file creation/deletion (optional) + OS level file lock.
  */
 class CrossProcessCacheFileLock {
     private final static Logger LOG = LoggerFactory.getLogger(CrossProcessCacheFileLock.class);
