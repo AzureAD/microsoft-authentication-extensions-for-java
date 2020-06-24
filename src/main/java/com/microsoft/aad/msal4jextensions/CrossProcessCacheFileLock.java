@@ -83,8 +83,8 @@ class CrossProcessCacheFileLock {
     }
 
     /**
-     * Tries to acquire lock by creating lock file,
-     * in case of failure try to acquire OS lock for lock file
+     * Tries to acquire lock by creating lockFile (optional),
+     * and acquiring OS lock for lockFile (mandatory)
      * Retries {@link #retryNumber} times with {@link #retryDelayMilliseconds} delay
      *
      * @throws CacheFileLockAcquisitionException if the lock was not obtained.
@@ -138,7 +138,8 @@ class CrossProcessCacheFileLock {
     }
 
     /**
-     * Release OS lock for lockFile
+     * Release OS lock for lockFile,
+     * delete lockFile if it was created by lock() method
      *
      * @throws IOException
      */
