@@ -10,7 +10,7 @@ class CacheFileWriterRunnable extends CacheWriterRunnable {
     CacheFileWriterRunnable(String id, String lockFilePath, String filePath, String lockHoldingIntervalsFilePath) {
         this.lockHoldingIntervalsFilePath = lockHoldingIntervalsFilePath;
 
-        lock = new CrossProcessCacheFileLock(lockFilePath, 150, 600);
+        lock = new CrossProcessCacheFileLock(lockFilePath, 150, 100);
         cacheAccessor = new CacheFileAccessor(filePath);
     }
 }

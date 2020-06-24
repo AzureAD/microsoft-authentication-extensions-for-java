@@ -57,16 +57,8 @@ class CrossProcessCacheFileLock {
         return "pid:" + getProcessId() + " thread:" + Thread.currentThread().getId();
     }
 
-    /**
-     * Tries to acquire lock by creating lock file,
-     * in case of failure try to acquire OS lock for lock file
-     * Retries {@link #retryNumber} times with {@link #retryDelayMilliseconds} delay
-     *
-     * @throws CacheFileLockAcquisitionException if the lock was not obtained.
-     */
-    void lock() throws CacheFileLockAcquisitionException {
+    private boolean tryToCreateLockFile() {
         boolean fileCreated = false;
-
         for (int tryCount = 0; tryCount < retryNumber; tryCount++) {
             try {
                 fileCreated = lockFile.createNewFile();
@@ -75,14 +67,29 @@ class CrossProcessCacheFileLock {
             if (fileCreated) {
                 break;
             } else {
-                try {
-                    Thread.sleep(retryDelayMilliseconds);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                sleep();
             }
         }
-        if (!fileCreated) {
+        return fileCreated;
+    }
+
+    private void sleep(){
+        try {
+            Thread.sleep(retryDelayMilliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Tries to acquire lock by creating lock file,
+     * in case of failure try to acquire OS lock for lock file
+     * Retries {@link #retryNumber} times with {@link #retryDelayMilliseconds} delay
+     *
+     * @throws CacheFileLockAcquisitionException if the lock was not obtained.
+     */
+    void lock() throws CacheFileLockAcquisitionException {
+        if (!tryToCreateLockFile()) {
             LOG.debug(getLockProcessThreadId() + " Failed to create lock file!");
         }
 
@@ -96,42 +103,37 @@ class CrossProcessCacheFileLock {
                         StandardOpenOption.SYNC,
                         StandardOpenOption.WRITE);
 
+                // try to get file lock
                 lock = fileChannel.tryLock();
                 if (lock == null) {
                     throw new IllegalStateException("Lock is not available");
                 }
 
-                String jvmName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
-
                 // for debugging purpose write jvm name to lock file
-                ByteBuffer buff = ByteBuffer.wrap(jvmName.replace("@", " ").
-                        getBytes(StandardCharsets.UTF_8));
-                fileChannel.write(buff);
+                writeJvmName(fileChannel);
 
-                LOG.debug(getLockProcessThreadId() + " acquired OK file lock");
                 locked = true;
+                LOG.debug(getLockProcessThreadId() + " acquired OK file lock");
                 return;
-
             } catch (Exception ex) {
                 LOG.debug(getLockProcessThreadId() + " failed to acquire lock," +
                         " exception msg - " + ex.getMessage());
-                try {
-                    releaseResources();
-                } catch (IOException e) {
-                    LOG.error(e.getMessage());
-                }
-
-                try {
-                    Thread.sleep(retryDelayMilliseconds);
-                } catch (InterruptedException e) {
-                    LOG.error(e.getMessage());
-                }
+                releaseResources();
+                sleep();
             }
         }
         LOG.error(getLockProcessThreadId() + " failed to acquire lock");
 
         throw new CacheFileLockAcquisitionException(
                 getLockProcessThreadId() + " failed to acquire lock");
+    }
+
+    private void writeJvmName(FileChannel fileChannel) throws IOException {
+        String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+
+        ByteBuffer buff = ByteBuffer.wrap(jvmName.replace("@", " ").
+                getBytes(StandardCharsets.UTF_8));
+        fileChannel.write(buff);
     }
 
     /**
@@ -155,12 +157,17 @@ class CrossProcessCacheFileLock {
         }
     }
 
-    private void releaseResources() throws IOException {
-        if (lock != null) {
-            lock.release();
+    private void releaseResources() {
+        try {
+            if (lock != null) {
+                lock.release();
+            }
+            if (fileChannel != null) {
+                fileChannel.close();
+            }
         }
-        if (fileChannel != null) {
-            fileChannel.close();
+        catch (IOException ex){
+            LOG.error(ex.getMessage());
         }
     }
 }
