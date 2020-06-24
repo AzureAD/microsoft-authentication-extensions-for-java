@@ -58,22 +58,22 @@ class CrossProcessCacheFileLock {
     }
 
     private boolean tryToCreateLockFile() {
-        boolean fileCreated = false;
         for (int tryCount = 0; tryCount < retryNumber; tryCount++) {
+            boolean fileCreated = false;
             try {
                 fileCreated = lockFile.createNewFile();
             } catch (IOException ex) {
             }
             if (fileCreated) {
-                break;
+                return true;
             } else {
-                sleep();
+                waitBeforeRetry();
             }
         }
-        return fileCreated;
+        return false;
     }
 
-    private void sleep(){
+    private void waitBeforeRetry(){
         try {
             Thread.sleep(retryDelayMilliseconds);
         } catch (InterruptedException e) {
@@ -119,7 +119,7 @@ class CrossProcessCacheFileLock {
                 LOG.debug(getLockProcessThreadId() + " failed to acquire lock," +
                         " exception msg - " + ex.getMessage());
                 releaseResources();
-                sleep();
+                waitBeforeRetry();
             }
         }
         LOG.error(getLockProcessThreadId() + " failed to acquire lock");
