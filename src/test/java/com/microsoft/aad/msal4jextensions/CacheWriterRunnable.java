@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.microsoft.aad.msal4jextensions;
 
 import com.microsoft.aad.msal4jextensions.persistence.ICacheAccessor;
@@ -5,7 +8,6 @@ import com.microsoft.aad.msal4jextensions.persistence.ICacheAccessor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Random;
 
 public class CacheWriterRunnable implements Runnable {
     ICacheAccessor cacheAccessor;

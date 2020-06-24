@@ -87,7 +87,7 @@ public class KeyChainAccessor implements ICacheAccessor {
     @Override
     public void write(byte[] data) {
         int NUM_OF_RETRIES = 3;
-        int RETRY_DELAY = 10;
+        int RETRY_DELAY_IN_MS = 10;
         int status = 0;
 
         for (int i = 0; i < NUM_OF_RETRIES; i++) {
@@ -98,7 +98,7 @@ public class KeyChainAccessor implements ICacheAccessor {
                 return;
             }
             try {
-                Thread.sleep(RETRY_DELAY);
+                Thread.sleep(RETRY_DELAY_IN_MS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
