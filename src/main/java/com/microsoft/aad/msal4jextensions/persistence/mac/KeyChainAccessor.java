@@ -50,8 +50,7 @@ public class KeyChainAccessor implements ICacheAccessor {
         }
     }
 
-    @Override
-    public void write(byte[] data) {
+    private int writeNoRetry(byte[] data) {
         Pointer[] itemRef = new Pointer[1];
         int status;
 
@@ -62,33 +61,50 @@ public class KeyChainAccessor implements ICacheAccessor {
                     accountNameBytes.length, accountNameBytes,
                     null, null, itemRef);
 
-            if (status != ISecurityLibrary.ERR_SEC_SUCCESS
-                    && status != ISecurityLibrary.ERR_SEC_ITEM_NOT_FOUND) {
-                throw new KeyChainAccessException(convertErrorCodeToMessage(status));
-            }
+            if (status == ISecurityLibrary.ERR_SEC_SUCCESS && itemRef[0] != null) {
 
-            if (itemRef[0] != null) {
                 status = ISecurityLibrary.library.SecKeychainItemModifyContent(
                         itemRef[0], null, data.length, data);
-            } else {
+
+            } else if (status == ISecurityLibrary.ERR_SEC_ITEM_NOT_FOUND) {
                 status = ISecurityLibrary.library.SecKeychainAddGenericPassword(
-                        Pointer.NULL,
+                        null,
                         serviceNameBytes.length, serviceNameBytes,
                         accountNameBytes.length, accountNameBytes,
                         data.length, data, null);
-            }
-
-            if (status != ISecurityLibrary.ERR_SEC_SUCCESS) {
+            } else {
                 throw new KeyChainAccessException(convertErrorCodeToMessage(status));
             }
-
-            new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTimeByWritingDummyData();
 
         } finally {
             if (itemRef[0] != null) {
                 ISecurityLibrary.library.CFRelease(itemRef[0]);
             }
         }
+        return status;
+    }
+
+    @Override
+    public void write(byte[] data) {
+        int NUM_OF_RETRIES = 3;
+        int RETRY_DELAY_IN_MS = 10;
+        int status = 0;
+
+        for (int i = 0; i < NUM_OF_RETRIES; i++) {
+            status = writeNoRetry(data);
+
+            if (status == ISecurityLibrary.ERR_SEC_SUCCESS) {
+                new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
+                return;
+            }
+            try {
+                Thread.sleep(RETRY_DELAY_IN_MS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        throw new KeyChainAccessException(convertErrorCodeToMessage(status));
     }
 
     @Override
@@ -117,7 +133,7 @@ public class KeyChainAccessor implements ICacheAccessor {
                     throw new KeyChainAccessException(convertErrorCodeToMessage(status));
                 }
             }
-            new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTimeByWritingDummyData();
+            new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
         } finally {
             if (itemRef[0] != null) {
                 ISecurityLibrary.library.CFRelease(itemRef[0]);
