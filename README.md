@@ -35,6 +35,8 @@ You can find the changes for each version under
 
 ## Usage
 
+[![javadoc](https://javadoc.io/badge2/com.microsoft.azure/msal4j-persistence-extension/javadoc.svg)](https://javadoc.io/doc/com.microsoft.azure/msal4j-persistence-extension)
+
 The Microsoft Authentication Extensions library provides the `PersistenceTokenCacheAccessAspect` which is an implementation of the `ITokenCacheAccessAspect` interface defined in MSAL Java. After configuring this token cache, it can then be used to instantiate the client application in MSAL Java. 
 
 The token cache includes a file lock, and auto-reload behavior under the hood.
