@@ -48,7 +48,7 @@ public class KeyRingAccessor implements ICacheAccessor {
         this.attributeValue2 = attributeValue2;
     }
 
-    public void verify() throws IOException {
+    public void verify() {
         String testAttributeValue1 = "testAttr1";
         String testAttributeValue2 = "testAttr2";
         String testData = "Test Data";
@@ -113,7 +113,7 @@ public class KeyRingAccessor implements ICacheAccessor {
             throw new KeyRingAccessException("An error while saving secret to keyring, " +
                     "domain:" + err.domain + " code:" + err.code + " message:" + err.message);
         }
-        new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTimeByWritingDummyData();
+        new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
     }
 
     @Override
@@ -138,7 +138,7 @@ public class KeyRingAccessor implements ICacheAccessor {
             throw new KeyRingAccessException("An error while deleting secret from keyring, " +
                     "domain:" + err.domain + " code:" + err.code + " message:" + err.message);
         }
-        new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTimeByWritingDummyData();
+        new CacheFileAccessor(cacheFilePath).updateCacheFileLastModifiedTime();
     }
 
     @Override

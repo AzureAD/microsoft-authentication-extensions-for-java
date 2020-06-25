@@ -22,7 +22,7 @@ Add the dependecy to the pom file.
 <dependency>
     <groupId>com.microsoft.azure</groupId>
     <artifactId>msal4j-persistence-extension</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 
@@ -34,6 +34,8 @@ You can find the changes for each version under
 [Releases](https://github.com/AzureAD/microsoft-authentication-extensions-for-java/releases).
 
 ## Usage
+
+[![javadoc](https://javadoc.io/badge2/com.microsoft.azure/msal4j-persistence-extension/javadoc.svg)](https://javadoc.io/doc/com.microsoft.azure/msal4j-persistence-extension)
 
 The Microsoft Authentication Extensions library provides the `PersistenceTokenCacheAccessAspect` which is an implementation of the `ITokenCacheAccessAspect` interface defined in MSAL Java. After configuring this token cache, it can then be used to instantiate the client application in MSAL Java. 
 

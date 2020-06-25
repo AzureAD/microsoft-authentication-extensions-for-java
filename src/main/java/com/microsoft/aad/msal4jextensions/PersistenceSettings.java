@@ -312,7 +312,12 @@ public class PersistenceSettings {
          * @return An immutable instance of {@link com.microsoft.aad.msal4jextensions.PersistenceSettings}.
          */
         public PersistenceSettings build() {
-            PersistenceSettings persistenceSettings = new PersistenceSettings(
+            if (keyringSchemaName != null && linuxUseUnprotectedFileAsCacheStorage) {
+                throw new IllegalArgumentException(
+                        "Only one type of persistence can be used on Linux - KeyRing or Unprotected file");
+            }
+
+            return new PersistenceSettings(
                     cacheFileName,
                     cacheDirectoryPath,
                     keychainService,
@@ -327,8 +332,6 @@ public class PersistenceSettings {
                     linuxUseUnprotectedFileAsCacheStorage,
                     lockRetryDelayMilliseconds,
                     lockRetryNumber);
-
-            return persistenceSettings;
         }
     }
 }
