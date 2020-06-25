@@ -150,6 +150,7 @@ class CrossProcessCacheFileLock {
 
         if (locked) {
             deleteLockFile();
+            locked = false;
         }
     }
 

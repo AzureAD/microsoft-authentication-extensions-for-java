@@ -81,7 +81,13 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
                         parameters.getKeyringAttribute2Key(),
                         parameters.getKeyringAttribute2Value());
 
-                ((KeyRingAccessor) cacheAccessor).verify();
+                try{
+                    lock.lock();
+                    ((KeyRingAccessor) cacheAccessor).verify();
+                }
+                finally {
+                    lock.unlock();
+                }
             }
         }
     }
