@@ -22,12 +22,12 @@ public class CacheLockFileStorageTest extends CacheLockTestBase {
 
     @Test
     public void multipleThreadsWriting_CacheFile() throws IOException, InterruptedException {
-        int numOfThreads = 100;
+        int numOfThreads = 50;
 
         multipleThreadsWriting(cacheFileAccessor, numOfThreads, new CacheFileWriterRunnableFactory());
     }
 
-    @Test
+    //@Test
     public void multipleProcessesWriting_CacheFile() throws IOException, InterruptedException {
         int numOfProcesses = 20;
 

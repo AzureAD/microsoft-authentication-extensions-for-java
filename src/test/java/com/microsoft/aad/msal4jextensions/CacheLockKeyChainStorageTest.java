@@ -32,7 +32,7 @@ public class CacheLockKeyChainStorageTest extends CacheLockTestBase {
         }
     }
 
-    @Test
+    //@Test
     public void multipleThreadsWriting_KeyChain() throws IOException, InterruptedException {
         int numOfThreads = 100;
 
@@ -40,7 +40,7 @@ public class CacheLockKeyChainStorageTest extends CacheLockTestBase {
     }
 
 
-    @Test
+    //@Test
     public void multipleProcessesWriting_KeyChain() throws IOException, InterruptedException {
         int numOfProcesses = 10;
 

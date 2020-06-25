@@ -40,14 +40,14 @@ public class CacheLockKeyRingStorageTest extends CacheLockTestBase {
         }
     }
 
-    @Test
+    //@Test
     public void multipleThreadsWriting_KeyRing() throws IOException, InterruptedException {
         int numOfThreads = 100;
 
         multipleThreadsWriting(keyRingAccessor, numOfThreads, new KeyRingWriterRunnableFactory());
     }
 
-    @Test
+    //@Test
     public void multipleProcessesWriting_KeyRing() throws IOException, InterruptedException {
         int numOfProcesses = 20;
 
