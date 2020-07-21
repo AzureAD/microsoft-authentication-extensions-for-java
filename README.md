@@ -22,7 +22,7 @@ Add the dependecy to the pom file.
 <dependency>
     <groupId>com.microsoft.azure</groupId>
     <artifactId>msal4j-persistence-extension</artifactId>
-    <version>0.2.0</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
