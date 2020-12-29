@@ -145,10 +145,12 @@ public class PersistenceTokenCacheAccessAspect implements ITokenCacheAccessAspec
                 updateLastSeenCacheFileModifiedTimestamp();
             }
         } finally {
-            try {
-                lock.unlock();
-            } catch (IOException e) {
-                LOG.error(e.getMessage());
+            if(lock != null) {
+                try {
+                    lock.unlock();
+                } catch (IOException e) {
+                    LOG.error(e.getMessage());
+                }
             }
         }
     }

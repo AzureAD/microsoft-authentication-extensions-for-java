@@ -6,7 +6,7 @@
 
     <groupId>com.microsoft.azure</groupId>
     <artifactId>msal4j-persistence-extension</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
     <name>msal4j-persistence-extension</name>
     <description>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13</version>
+            <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
 
