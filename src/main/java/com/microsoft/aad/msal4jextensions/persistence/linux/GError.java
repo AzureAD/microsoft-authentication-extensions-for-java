@@ -15,11 +15,11 @@ import java.util.List;
  */
 class GError extends Structure {
 
-    int domain;
+    public int domain;
 
-    int code;
+    public int code;
 
-    String message;
+    public String message;
 
     GError(Pointer p) {
         super(p);
