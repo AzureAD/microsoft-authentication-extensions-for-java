@@ -162,7 +162,7 @@ class CrossProcessCacheFileLock {
 
     private void releaseResources() {
         try {
-            if (lock != null) {
+            if (lock != null && lock.isValid()) {
                 lock.release();
             }
             if (fileChannel != null) {
